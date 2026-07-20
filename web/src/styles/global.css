@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  /* Mengambil nilai dari CSS Variables yang diatur di HTML */
+  --color-brand-primary: var(--color-primary);
+  --color-brand-accent: var(--color-accent);
+  --color-brand-functional: var(--color-functional);
+  --color-brand-dark: #1A1A1A;
+  --color-brand-light: #F8F9FA;
+  
+  /* Konfigurasi Font Premium */
+  --font-sans: 'Poppins', 'Montserrat', sans-serif;
+  --font-serif: 'Playfair Display', 'Georgia', serif;
+}
+
+/* Tema SMA ABBS Yogyakarta (Default) */
+[data-theme="yogyakarta"] {
+  --color-primary: #8B1D2D;      /* Rich Maroon */
+  --color-accent: #C5A059;       /* Sophisticated Gold */
+  --color-functional: #74B9FF;   /* Subtle Sky Blue */
+}
+
+/* Tema SMA ABBS Klaten */
+[data-theme="klaten"] {
+  --color-primary: #8B1D2D;      /* Rich Maroon */
+  --color-accent: #008080;       /* Deep Teal */
+  --color-functional: #4056A1;   /* Slate Blue */
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-brand-dark);
+  background-color: #FFFFFF;
+  overflow-x: hidden;
+}
