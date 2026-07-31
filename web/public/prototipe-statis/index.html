@@ -193,7 +193,9 @@
     <!-- Hero Section Start -->
     <main id="konten-utama" class="pt-24 lg:pt-32 pb-24 lg:pb-40 overflow-hidden relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Menggunakan grid-cols-1 untuk mobile, dan lg:grid-cols-2 untuk desktop -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
                 <div class="relative z-10">
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-abbs-blue-dark font-semibold text-sm mb-6 border border-blue-100 shadow-sm">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path></svg>
@@ -212,30 +214,34 @@
                     <div class="flex flex-wrap items-center gap-4">
                         <a href="https://wa.me/62274xxxxxxx?text=Assalamualaikum%2C%20saya%20ingin%20mendaftarkan%20anak%20saya%20ke%20SMA%20ABBS%20Yogyakarta"
                            target="_blank" rel="noopener"
-                           class="bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                           class="bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto text-center">
                             Daftar PPS Sekarang
                         </a>
-                        <a href="#tentang-kami" class="flex items-center gap-3 bg-white hover:bg-gray-50 text-gray-800 px-6 py-3.5 rounded-full font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                        <a href="#tentang-kami" class="flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-800 px-6 py-3.5 rounded-full font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 w-full sm:w-auto">
                             <span class="w-10 h-10 rounded-full bg-red-50 text-abbs-maroon flex items-center justify-center shadow-sm">
                                 <svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                             </span>
                             Lihat Profil
                         </a>
                     </div>
-                    <p class="text-sm text-gray-500 mt-4">Gratis konsultasi jalur pendaftaran — balasan WhatsApp dalam 1x24 jam kerja.</p>
+                    <p class="text-sm text-gray-500 mt-4 text-center sm:text-left">Gratis konsultasi jalur pendaftaran — balasan WhatsApp dalam 1x24 jam kerja.</p>
                 </div>
 
-                <div class="relative z-10 hidden lg:block">
-                    <div class="relative h-[550px] rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white">
+                <!-- Bagian gambar sekarang terlihat di semua ukuran layar -->
+                <div class="relative z-10 mt-8 lg:mt-0 w-full">
+                    <!-- Penyesuaian tinggi responsif: 320px di mobile, 400px di tablet, 550px di desktop -->
+                    <div class="relative h-[320px] sm:h-[400px] lg:h-[550px] rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white">
                         <img src="./img/hero-image-sma-abbs-yogya.webp" alt="Siswa SMA ABBS Yogyakarta belajar bersama di kelas" class="w-full h-full object-cover" loading="eager">
                         <div class="absolute inset-0 bg-gradient-to-t from-abbs-blue-dark/40 to-transparent mix-blend-multiply"></div>
                     </div>
-                    <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-[radial-gradient(#52B3E6_2px,transparent_2px)] [background-size:16px_16px] opacity-40 -z-10"></div>
+                    <!-- Dekorasi titik disembunyikan di mobile agar layout tetap rapi -->
+                    <div class="hidden sm:block absolute -bottom-6 -right-6 w-32 h-32 bg-[radial-gradient(#52B3E6_2px,transparent_2px)] [background-size:16px_16px] opacity-40 -z-10"></div>
                 </div>
+
             </div>
         </div>
-        <div class="absolute top-0 right-0 -mr-40 -mt-40 w-[500px] h-[500px] rounded-full bg-abbs-blue blur-[100px] opacity-20 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 -ml-40 w-[400px] h-[400px] rounded-full bg-abbs-maroon blur-[120px] opacity-10 pointer-events-none"></div>
+        <div class="absolute top-0 right-0 -mr-20 lg:-mr-40 -mt-20 lg:-mt-40 w-[300px] lg:w-[500px] h-[300px] lg:h-[500px] rounded-full bg-abbs-blue blur-[80px] lg:blur-[100px] opacity-20 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 lg:-ml-40 w-[200px] lg:w-[400px] h-[200px] lg:h-[400px] rounded-full bg-abbs-maroon blur-[80px] lg:blur-[120px] opacity-10 pointer-events-none"></div>
     </main>
 
     <!-- Program Unggulan Cards Section -->
@@ -369,7 +375,6 @@
                     <p class="text-gray-600 font-medium text-sm uppercase tracking-wider">Program Unggulan</p>
                 </div>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-6">*Ganti angka di atas dengan data terbaru sekolah; angka yang tidak bisa diverifikasi (mis. "100% lulusan terbaik") justru menurunkan kepercayaan pembaca.</p>
         </div>
     </section>
 
@@ -421,7 +426,6 @@
                     <p class="text-sm text-gray-500">Wali murid kelas X Cambridge</p>
                 </div>
             </div>
-            <p class="text-center text-xs text-gray-400 mt-6">*Contoh testimoni — ganti dengan kutipan asli dan izin tertulis dari orang tua/alumni yang bersangkutan sebelum publikasi.</p>
         </div>
     </section>
 
