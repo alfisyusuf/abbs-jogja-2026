@@ -1,0 +1,59 @@
+---
+import Navbar from '../components/Navbar.astro'
+import Footer from '../components/Footer.astro'
+import WhatsAppButton from '../components/WhatsAppButton.astro'
+import {urlFor} from '../lib/sanity/image'
+import {getSiteSettings} from '../lib/sanity/queries'
+import '../styles/global.css'
+
+export interface Props {
+  title: string
+  description?: string
+  ogImage?: any
+}
+const {title, description, ogImage} = Astro.props
+const settings = await getSiteSettings()
+
+const pageTitle = `${title} — ${settings?.siteTitle || ''}`
+const metaDescription = description || settings?.seoDescription || ''
+const shareImage = ogImage
+  ? urlFor(ogImage).width(1200).url()
+  : settings?.logo
+    ? urlFor(settings.logo).width(1200).url()
+    : undefined
+---
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{pageTitle}</title>
+
+  <meta name="description" content={metaDescription} />
+  {settings?.seoKeywords && <meta name="keywords" content={settings.seoKeywords} />}
+  <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={metaDescription} />
+  {shareImage && <meta property="og:image" content={shareImage} />}
+  <meta property="og:locale" content="id_ID" />
+
+  {settings?.favicon && <link rel="icon" href={urlFor(settings.favicon).width(64).url()} />}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800">
+  <a href="#konten-utama" class="skip-link">Langsung ke konten</a>
+
+  <Navbar settings={settings} />
+
+  <slot />
+
+  <Footer settings={settings} />
+
+  <WhatsAppButton whatsappNumber={settings?.whatsappNumber} message={settings?.whatsappFloatMessage} />
+</body>
+</html>

@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.group:hover .group-hover\:block { display: block; }
+.group:focus-within .group-hover\:block { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-slow { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+a:focus-visible, button:focus-visible {
+  outline: 3px solid #52B3E6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: #52B3E6;
+  color: white;
+  padding: 12px 20px;
+  z-index: 100;
+  font-weight: 700;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+
+/* Gaya konten kaya (Portable Text) untuk Berita & Halaman */
+.prose-abbs h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.5rem; color: #111827; margin-top: 2rem; margin-bottom: 1rem; }
+.prose-abbs h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.25rem; color: #111827; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+.prose-abbs h4 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.1rem; color: #111827; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+.prose-abbs p { margin-bottom: 1.25rem; line-height: 1.8; color: #4b5563; }
+.prose-abbs ul { margin-bottom: 1.25rem; padding-left: 1.5rem; list-style: disc; color: #4b5563; }
+.prose-abbs ol { margin-bottom: 1.25rem; padding-left: 1.5rem; list-style: decimal; color: #4b5563; }
+.prose-abbs li { margin-bottom: 0.5rem; line-height: 1.7; }
+.prose-abbs blockquote { border-left: 4px solid #52B3E6; background: #eff8fd; padding: 1.25rem 1.5rem; border-radius: 0 1rem 1rem 0; font-style: italic; color: #1f2937; margin: 1.5rem 0; }
+.prose-abbs figure { margin: 1.5rem 0; }
+.prose-abbs img { border-radius: 1.5rem; width: 100%; height: auto; }
+.prose-abbs figcaption { text-align: center; font-size: 0.875rem; color: #9ca3af; margin-top: 0.5rem; font-style: italic; }
+.prose-abbs a { color: #2E86BF; text-decoration: underline; font-weight: 600; }
+.prose-abbs strong { color: #111827; }

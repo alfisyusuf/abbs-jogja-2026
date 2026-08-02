@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {toHtml} from '../lib/sanity/portableText'
+import {getAllPageSlugs, getPageBySlug} from '../lib/sanity/queries'
+
+export async function getStaticPaths() {
+  const slugs = await getAllPageSlugs()
+  return slugs.map((s: any) => ({params: {slug: s.slug}}))
+}
+
+const {slug} = Astro.params
+const page = await getPageBySlug(slug as string)
+
+if (!page) {
+  return Astro.redirect('/404')
+}
+
+const bodyHtml = toHtml(page.body)
+---
+<BaseLayout title={page.title} description={page.seo?.metaDescription || page.subtitle} ogImage={page.seo?.shareImage}>
+  <main class="pt-24 lg:pt-32 pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+      <h1 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-6">{page.title}</h1>
+      {page.subtitle && <p class="text-lg text-gray-600 leading-relaxed">{page.subtitle}</p>}
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <article class="prose-abbs max-w-3xl" set:html={bodyHtml} />
+    </div>
+  </main>
+</BaseLayout>

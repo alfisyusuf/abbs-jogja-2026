@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {urlFor} from '../../lib/sanity/image'
+import {toHtml} from '../../lib/sanity/portableText'
+import {getAllPostSlugs, getPostBySlug, getRelatedPosts, getAllCategories} from '../../lib/sanity/queries'
+
+export async function getStaticPaths() {
+  const slugs = await getAllPostSlugs()
+  return slugs.map((s: any) => ({params: {slug: s.slug}}))
+}
+
+const {slug} = Astro.params
+const post = await getPostBySlug(slug as string)
+
+if (!post) {
+  return Astro.redirect('/404')
+}
+
+const related = post.category ? await getRelatedPosts(post.category.title, slug as string, 2) : []
+const categories = await getAllCategories()
+
+const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(1600).height(700).url() : null
+const bodyHtml = toHtml(post.body)
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+}
+
+const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b: any) => b._type === 'block').reduce((acc: number, b: any) => acc + (b.children?.map((c: any) => c.text).join(' ').split(/\s+/).length || 0), 0) / 200))
+---
+<BaseLayout title={post.title} description={post.seo?.metaDescription || post.excerpt} ogImage={post.seo?.shareImage || post.mainImage}>
+  <main class="pt-24 lg:pt-32 pb-20">
+
+    <!-- Breadcrumb -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-gray-500 font-medium">
+        <a href="/" class="hover:text-abbs-blue-dark transition-colors">Beranda</a>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <a href="/berita" class="hover:text-abbs-blue-dark transition-colors">Berita</a>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <span class="text-gray-800 truncate">{post.title}</span>
+      </nav>
+    </div>
+
+    <!-- Header artikel -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {post.category && (
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-abbs-blue-dark font-bold text-xs uppercase tracking-wider mb-5 border border-blue-100">
+          {post.category.title}
+        </div>
+      )}
+      <h1 class="font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-6">{post.title}</h1>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-500 font-medium pb-8 border-b border-gray-100">
+        {post.author && (
+          <div class="flex items-center gap-2">
+            {post.author.image && <img src={urlFor(post.author.image).width(80).height(80).url()} alt="" class="w-8 h-8 rounded-full object-cover" loading="lazy" />}
+            <span class="text-gray-800 font-semibold">{post.author.name}</span>
+          </div>
+        )}
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>{estimatedReadMinutes} menit baca</span>
+        </div>
+      </div>
+    </div>
+
+    {mainImageUrl && (
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div class="rounded-[2rem] overflow-hidden shadow-xl">
+          <img src={mainImageUrl} alt={post.title} class="w-full h-[280px] md:h-[420px] object-cover" loading="eager" />
+        </div>
+      </div>
+    )}
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid lg:grid-cols-3 gap-12">
+      <article class="lg:col-span-2 prose-abbs" set:html={bodyHtml} />
+
+      <aside class="space-y-8">
+        <div class="bg-blue-50 rounded-3xl p-6 border border-blue-100">
+          <h3 class="font-display text-lg font-semibold text-gray-900 mb-2">Tertarik Bergabung?</h3>
+          <p class="text-sm text-gray-600 mb-4 leading-relaxed">Tanyakan program sekolah langsung ke tim kami.</p>
+          <a href="/#faq" class="block text-center bg-abbs-blue hover:bg-abbs-blue-dark text-white px-5 py-3 rounded-full font-bold text-sm transition-all shadow-md">Tanya via WhatsApp</a>
+        </div>
+
+        {related.length > 0 && (
+          <div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Berita Terkait</h3>
+            <div class="space-y-4">
+              {related.map((r: any) => (
+                <a href={`/berita/${r.slug}`} class="flex gap-3 group">
+                  {r.mainImage && <img src={urlFor(r.mainImage).width(160).height(160).url()} alt="" class="w-20 h-20 rounded-xl object-cover shrink-0" loading="lazy" />}
+                  <div>
+                    <p class="text-sm font-bold text-gray-800 group-hover:text-abbs-blue-dark transition-colors line-clamp-3">{r.title}</p>
+                    <p class="text-xs text-gray-400 mt-1">{formatDate(r.publishedAt)}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {categories.length > 0 && (
+          <div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Kategori</h3>
+            <div class="flex flex-wrap gap-2">
+              {categories.map((c: any) => (
+                <a href="/berita" class="px-3 py-1.5 bg-white border border-gray-200 hover:border-abbs-blue hover:text-abbs-blue-dark text-gray-600 text-xs font-semibold rounded-full transition-colors">{c.title}</a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+
+    {(post.prev || post.next) && (
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-gray-100">
+        <div class="grid sm:grid-cols-2 gap-4">
+          {post.prev ? (
+            <a href={`/berita/${post.prev.slug}`} class="group flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 hover:border-abbs-blue hover:shadow-lg transition-all">
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-abbs-blue-dark shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+              <div>
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Sebelumnya</p>
+                <p class="text-sm font-bold text-gray-800 group-hover:text-abbs-blue-dark transition-colors line-clamp-1">{post.prev.title}</p>
+              </div>
+            </a>
+          ) : <div />}
+          {post.next && (
+            <a href={`/berita/${post.next.slug}`} class="group flex items-center justify-end gap-4 p-5 rounded-2xl bg-white border border-gray-100 hover:border-abbs-blue hover:shadow-lg transition-all text-right">
+              <div>
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Berikutnya</p>
+                <p class="text-sm font-bold text-gray-800 group-hover:text-abbs-blue-dark transition-colors line-clamp-1">{post.next.title}</p>
+              </div>
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-abbs-blue-dark shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+          )}
+        </div>
+      </div>
+    )}
+  </main>
+</BaseLayout>

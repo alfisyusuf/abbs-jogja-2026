@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import {urlFor} from '../../../lib/sanity/image'
+import {getAllPostsPaged, getPostCount} from '../../../lib/sanity/queries'
+
+const PER_PAGE = 9
+
+export async function getStaticPaths() {
+  const total = await getPostCount()
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+  return Array.from({length: Math.max(0, totalPages - 1)}).map((_, i) => ({
+    params: {page: String(i + 2)},
+  }))
+}
+
+const {page} = Astro.params
+const currentPage = Number(page)
+const total = await getPostCount()
+const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+const start = (currentPage - 1) * PER_PAGE
+const posts = await getAllPostsPaged(start, start + PER_PAGE)
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+}
+---
+<BaseLayout title={`Berita & Agenda — Halaman ${currentPage}`}>
+  <main class="pt-24 lg:pt-32 pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-14">
+      <h1 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-4">Berita & Agenda</h1>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        {posts.map((post: any) => (
+          <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
+            <a href={`/berita/${post.slug}`}>
+              <div class="relative h-52 overflow-hidden">
+                {post.mainImage && <img src={urlFor(post.mainImage).width(600).height(400).url()} alt={post.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />}
+                {post.category && <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">{post.category}</div>}
+              </div>
+              <div class="p-8">
+                <time class="text-sm text-gray-500 font-medium block mb-3" datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                <h2 class="font-display text-2xl font-semibold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors leading-snug">{post.title}</h2>
+                <p class="text-gray-600 text-sm line-clamp-3">{post.excerpt}</p>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+
+      <div class="mt-14 flex items-center justify-center gap-2">
+        {currentPage === 2
+          ? <a href="/berita" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark font-bold">1</a>
+          : <a href={`/berita/halaman/${currentPage - 1}`} class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark font-bold">{currentPage - 1}</a>}
+        <span class="w-10 h-10 rounded-full bg-abbs-blue text-white flex items-center justify-center font-bold">{currentPage}</span>
+        {currentPage < totalPages && (
+          <a href={`/berita/halaman/${currentPage + 1}`} class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark font-bold">{currentPage + 1}</a>
+        )}
+      </div>
+    </div>
+  </main>
+</BaseLayout>
