@@ -3,9 +3,13 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
 import {urlFor} from '../../../lib/sanity/image'
 import {getAllPostsPaged, getPostCount} from '../../../lib/sanity/queries'
 
+// 1. Tetap di sini untuk digunakan oleh komponen saat rendering
 const PER_PAGE = 9
 
 export async function getStaticPaths() {
+  // 2. TAMBAHKAN DI SINI untuk digunakan saat proses build/prerendering Astro
+  const PER_PAGE = 9
+  
   const total = await getPostCount()
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
   return Array.from({length: Math.max(0, totalPages - 1)}).map((_, i) => ({
