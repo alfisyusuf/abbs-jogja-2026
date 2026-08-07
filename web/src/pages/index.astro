@@ -1,11 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
 import {urlFor} from '../lib/sanity/image'
-// 1. Tambahkan getSiteSettings di sini
 import {getHomePage, getLatestPosts, getSiteSettings} from '../lib/sanity/queries'
 
 const home = await getHomePage()
-// 2. Panggil datanya
 const settings = await getSiteSettings()
 const latestPosts = await getLatestPosts(3)
 
@@ -37,7 +35,6 @@ function formatDate(dateStr: string) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div class="relative z-10">
-          {/* Cek apakah PPS sedang aktif dan teksnya ada di Site Settings */}
           {(settings?.ppsActive && settings?.ppsBadgeText) && (
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-abbs-blue-dark font-semibold text-sm mb-6 border border-blue-100 shadow-sm">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path></svg>
@@ -81,10 +78,25 @@ function formatDate(dateStr: string) {
   <!-- Program Unggulan -->
   <section id="program" class="relative z-20 -mt-4 lg:-mt-12 pb-20 scroll-mt-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      {(home?.programSectionTitle || home?.programEyebrow) && (
+        <div class="text-center mb-12 lg:mb-16">
+          {home?.programEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              {home.programEyebrow}
+            </div>
+          )}
+          {home?.programSectionTitle && <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.programSectionTitle}</h2>}
+          {home?.programDescription && <p class="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">{home.programDescription}</p>}
+        </div>
+      )}
+
       <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
         {(home?.programs || []).map((program: any) => {
           const c = colorMap[program.color] || colorMap.blue
           const svgPath = iconMap[program.icon] || iconMap['book-open']
+          
           return (
             <div class="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl border border-gray-100 hover:-translate-y-2 transition-all duration-300 group">
               <div class={`w-16 h-16 ${c.bg} ${c.bgHover} rounded-2xl flex items-center justify-center mb-6 ${c.text} group-hover:text-white transition-colors duration-300`}>
@@ -135,7 +147,10 @@ function formatDate(dateStr: string) {
         </div>
         <div class="mt-12 lg:mt-0 lg:pl-8">
           {home?.aboutEyebrow && (
-            <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">{home.aboutEyebrow}</div>
+            <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              {home.aboutEyebrow}
+            </div>
           )}
           <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-6 leading-tight">{home?.aboutTitle}</h2>
           <p class="text-gray-600 leading-relaxed mb-8 text-lg">{home?.aboutDescription}</p>
@@ -175,7 +190,16 @@ function formatDate(dateStr: string) {
   {home?.testimonials?.length > 0 && (
     <section class="py-16 lg:py-24 bg-gray-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 text-center mb-12">{home.testimonialSectionTitle}</h2>
+        <div class="text-center mb-12">
+          {home?.testimonialEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+              {home.testimonialEyebrow}
+            </div>
+          )}
+          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.testimonialSectionTitle}</h2>
+        </div>
+        
         <div class="grid md:grid-cols-3 gap-8">
           {home.testimonials.map((t: any) => (
             <div class="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
@@ -194,17 +218,49 @@ function formatDate(dateStr: string) {
     </section>
   )}
 
-  <!-- Galeri -->
-  {home?.galleryImages?.length > 0 && (
+  <!-- Galeri & Lightbox (Support Foto & Video) -->
+  {(home?.galleryItems?.length > 0 || home?.galleryImages?.length > 0) && (
     <section class="py-16 lg:py-24 bg-white overflow-hidden relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 text-center mb-12">{home.gallerySectionTitle}</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {home.galleryImages.map((img: any) => (
-            <div class="rounded-2xl overflow-hidden aspect-square shadow-md">
-              <img src={urlFor(img).width(500).height(500).url()} alt={img.alt || ''} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        <div class="text-center mb-12">
+          {home?.galleryEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              {home.galleryEyebrow}
             </div>
-          ))}
+          )}
+          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-4 leading-tight">{home.gallerySectionTitle}</h2>
+          {home?.galleryDescription && <p class="text-gray-600 max-w-2xl mx-auto text-lg">{home.galleryDescription}</p>}
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {(home.galleryItems || []).map((item: any) => {
+            const isVideo = item.mediaType === 'video' && item.videoUrl;
+            const linkHref = isVideo ? item.videoUrl : (item.image ? urlFor(item.image).width(1200).url() : '#');
+            const dataTitle = item.title ? `title: ${item.title}` : '';
+            const dataGlightbox = `type: ${isVideo ? 'video' : 'image'}; ${dataTitle}`;
+            
+            return (
+              <a href={linkHref} class="glightbox relative rounded-2xl overflow-hidden aspect-square shadow-md group" data-glightbox={dataGlightbox}>
+                {item.image && <img src={urlFor(item.image).width(600).height(600).url()} alt={item.title || ''} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />}
+                
+                {isVideo && (
+                  <div class="absolute inset-0 bg-gray-900/30 flex items-center justify-center transition-colors duration-500 group-hover:bg-gray-900/50">
+                    <div class="w-14 h-14 bg-abbs-maroon text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                    </div>
+                  </div>
+                )}
+                
+                {item.title && (
+                  <div class="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-gray-800 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 truncate text-center">
+                    {item.title}
+                  </div>
+                )}
+              </a>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -214,10 +270,21 @@ function formatDate(dateStr: string) {
   {latestPosts?.length > 0 && (
     <section id="berita" class="py-16 lg:py-24 bg-gray-50 relative scroll-mt-24">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-12">
-          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">Berita & Agenda</h2>
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
+            {home?.beritaEyebrow && (
+              <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+                {home.beritaEyebrow}
+              </div>
+            )}
+            <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
+              {home?.beritaTitle || 'Berita & Agenda'}
+            </h2>
+          </div>
           <a href="/berita" class="hidden md:inline-flex bg-blue-50 text-abbs-blue-dark px-5 py-2.5 rounded-full font-bold text-sm hover:bg-abbs-blue hover:text-white transition-all">Lihat Semua Berita</a>
         </div>
+        
         <div class="grid md:grid-cols-3 gap-8">
           {latestPosts.map((post: any) => (
             <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
@@ -253,6 +320,12 @@ function formatDate(dateStr: string) {
     <section id="faq" class="py-16 lg:py-24 bg-white scroll-mt-24">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
+          {home?.faqEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              {home.faqEyebrow}
+            </div>
+          )}
           <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.faqSectionTitle}</h2>
         </div>
         <div class="space-y-4">

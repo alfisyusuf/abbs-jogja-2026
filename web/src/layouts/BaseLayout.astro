@@ -44,6 +44,7 @@ const shareImage = ogImage
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
 </head>
 <body class="bg-gray-50 font-sans antialiased text-gray-800">
   <a href="#konten-utama" class="skip-link">Langsung ke konten</a>
@@ -55,5 +56,13 @@ const shareImage = ogImage
   <Footer settings={settings} />
 
   <WhatsAppButton whatsappNumber={settings?.whatsappNumber} message={settings?.whatsappFloatMessage} />
+  
+  <script is:inline src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const lightbox = GLightbox({ touchNavigation: true, loop: true, autoplayVideos: true });
+    });
+  </script>
+</body>
 </body>
 </html>
