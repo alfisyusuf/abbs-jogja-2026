@@ -237,14 +237,30 @@ function formatDate(dateStr: string) {
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {(home.galleryItems || []).map((item: any) => {
             const isVideo = item.mediaType === 'video' && item.videoUrl;
-            const linkHref = isVideo ? item.videoUrl : (item.image ? urlFor(item.image).width(1200).url() : '#');
+            
+            // 1. URL untuk Lightbox (Resolusi tinggi, format otomatis)
+            const linkHref = isVideo ? item.videoUrl : (item.image ? urlFor(item.image).width(1200).auto('format').url() : '#');
+            
+            // 2. URL untuk Grid (Dipotong persegi, format otomatis aman untuk Safari)
+            const gridImgUrl = item.image ? urlFor(item.image).width(600).height(600).fit('crop').auto('format').url() : null;
+            
             const dataTitle = item.title ? `title: ${item.title}` : '';
             const dataGlightbox = `type: ${isVideo ? 'video' : 'image'}; ${dataTitle}`;
             
             return (
               <a href={linkHref} class="glightbox relative rounded-2xl overflow-hidden aspect-square shadow-md group" data-glightbox={dataGlightbox}>
-                {item.image && <img src={urlFor(item.image).width(600).height(600).url()} alt={item.title || ''} class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" />}
                 
+                {/* Render Gambar Thumbnail */}
+                {gridImgUrl && (
+                  <img 
+                    src={gridImgUrl} 
+                    alt={item.title || 'Galeri SMA ABBS'} 
+                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" 
+                    loading="lazy" 
+                  />
+                )}
+                
+                {/* Overlay Play Button khusus untuk Video */}
                 {isVideo && (
                   <div class="absolute inset-0 bg-gray-900/30 flex items-center justify-center transition-colors duration-500 group-hover:bg-gray-900/50">
                     <div class="w-14 h-14 bg-abbs-maroon text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -253,6 +269,7 @@ function formatDate(dateStr: string) {
                   </div>
                 )}
                 
+                {/* Judul Muncul Saat di-Hover */}
                 {item.title && (
                   <div class="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-gray-800 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 truncate text-center">
                     {item.title}
