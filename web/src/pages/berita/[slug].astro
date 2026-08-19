@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import {urlFor} from '../../lib/sanity/image'
 import {toHtml} from '../../lib/sanity/portableText'
-import {getAllPostSlugs, getPostBySlug, getRelatedPosts, getAllCategories} from '../../lib/sanity/queries'
+import {getAllPostSlugs, getPostBySlug, getRelatedPosts, getAllCategories, getSiteSettings} from '../../lib/sanity/queries'
 
 export async function getStaticPaths() {
   const slugs = await getAllPostSlugs()
@@ -11,6 +11,7 @@ export async function getStaticPaths() {
 
 const {slug} = Astro.params
 const post = await getPostBySlug(slug as string)
+const settings = await getSiteSettings()
 
 if (!post) {
   return Astro.redirect('/404')
@@ -27,6 +28,9 @@ function formatDate(dateStr: string) {
 }
 
 const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b: any) => b._type === 'block').reduce((acc: number, b: any) => acc + (b.children?.map((c: any) => c.text).join(' ').split(/\s+/).length || 0), 0) / 200))
+
+// Mengambil pesan default dari CMS, dengan teks cadangan jika di CMS kosong
+const waMessage = settings?.whatsappFloatMessage || 'Assalamualaikum, saya ingin bertanya tentang program SMA ABBS Yogyakarta';
 ---
 <BaseLayout title={post.title} description={post.seo?.metaDescription || post.excerpt} ogImage={post.seo?.shareImage || post.mainImage}>
   <main class="pt-24 lg:pt-32 pb-20">
@@ -122,11 +126,11 @@ const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b:
       {/* --- KOLOM KANAN: SIDEBAR --- */}
       <aside class="space-y-8">
         
-        {/* Banner CTA WhatsApp */}
+        {/* Banner CTA WhatsApp Dinamis */}
         <div class="bg-blue-50 rounded-3xl p-6 border border-blue-100">
           <h3 class="font-display text-lg font-semibold text-gray-900 mb-2">Tertarik Bergabung?</h3>
           <p class="text-sm text-gray-600 mb-4 leading-relaxed">Tanyakan program sekolah langsung ke tim kami.</p>
-          <a href="https://wa.me/62274xxxxxxx?text=Assalamualaikum%2C%20saya%20ingin%20bertanya%20tentang%20program%20SMA%20ABBS%20Yogyakarta" target="_blank" rel="noopener" class="block text-center bg-abbs-blue hover:bg-abbs-blue-dark text-white px-5 py-3 rounded-full font-bold text-sm transition-all shadow-md">
+          <a href={`https://wa.me/${settings?.whatsappNumber || ''}?text=${encodeURIComponent(waMessage)}`} target="_blank" rel="noopener" class="block text-center bg-abbs-blue hover:bg-abbs-blue-dark text-white px-5 py-3 rounded-full font-bold text-sm transition-all shadow-md">
             Tanya via WhatsApp
           </a>
         </div>
@@ -161,7 +165,9 @@ const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b:
           </div>
         )}
       </aside>
+    </div>
 
+    {/* Navigasi Artikel Sebelum & Sesudah */}
     {(post.prev || post.next) && (
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-gray-100">
         <div class="grid sm:grid-cols-2 gap-4">
