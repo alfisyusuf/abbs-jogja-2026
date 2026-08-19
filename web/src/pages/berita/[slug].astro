@@ -77,15 +77,61 @@ const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b:
     )}
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid lg:grid-cols-3 gap-12">
-      <article class="lg:col-span-2 prose-abbs" set:html={bodyHtml} />
+      
+      {/* --- KOLOM KIRI: KONTEN ARTIKEL, TAG & SHARE --- */}
+      <div class="lg:col-span-2">
+        <article class="prose-abbs" set:html={bodyHtml} />
 
+        {/* Bagian Tag & Share Buttons */}
+        <div class="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          
+          {/* Tags */}
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Tag:</span>
+            <div class="flex flex-wrap gap-2">
+              {post.tags && post.tags.length > 0 ? (
+                post.tags.map((tag: string) => (
+                  <span class="px-3 py-1 bg-gray-50 text-gray-600 text-xs font-semibold rounded-md border border-gray-100">
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span class="text-xs text-gray-400 italic">Tidak ada tag</span>
+              )}
+            </div>
+          </div>
+
+          {/* Share Buttons */}
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Bagikan:</span>
+            <div class="flex gap-2">
+              <a href={`https://wa.me/?text=${encodeURIComponent(post.title + ' - ' + Astro.url.href)}`} target="_blank" rel="noopener" aria-label="Share ke WhatsApp" class="w-9 h-9 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4C7.24 4 3.34 7.9 3.34 12.71c0 1.5.4 2.96 1.14 4.25L3.27 21l4.15-1.09a8.68 8.68 0 0 0 4.62 1.32h.01c4.81 0 8.72-3.9 8.72-8.71 0-2.33-.9-4.51-2.55-6.15Z"/></svg>
+              </a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noopener" aria-label="Share ke Facebook" class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
+              </a>
+              <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener" aria-label="Share ke X (Twitter)" class="w-9 h-9 rounded-full bg-gray-50 text-gray-700 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- KOLOM KANAN: SIDEBAR --- */}
       <aside class="space-y-8">
+        
+        {/* Banner CTA WhatsApp */}
         <div class="bg-blue-50 rounded-3xl p-6 border border-blue-100">
           <h3 class="font-display text-lg font-semibold text-gray-900 mb-2">Tertarik Bergabung?</h3>
           <p class="text-sm text-gray-600 mb-4 leading-relaxed">Tanyakan program sekolah langsung ke tim kami.</p>
-          <a href="/#faq" class="block text-center bg-abbs-blue hover:bg-abbs-blue-dark text-white px-5 py-3 rounded-full font-bold text-sm transition-all shadow-md">Tanya via WhatsApp</a>
+          <a href="https://wa.me/62274xxxxxxx?text=Assalamualaikum%2C%20saya%20ingin%20bertanya%20tentang%20program%20SMA%20ABBS%20Yogyakarta" target="_blank" rel="noopener" class="block text-center bg-abbs-blue hover:bg-abbs-blue-dark text-white px-5 py-3 rounded-full font-bold text-sm transition-all shadow-md">
+            Tanya via WhatsApp
+          </a>
         </div>
 
+        {/* Artikel Terkait */}
         {related.length > 0 && (
           <div>
             <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Berita Terkait</h3>
@@ -103,6 +149,7 @@ const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b:
           </div>
         )}
 
+        {/* Kategori Sidebar */}
         {categories.length > 0 && (
           <div>
             <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Kategori</h3>
@@ -114,7 +161,6 @@ const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b:
           </div>
         )}
       </aside>
-    </div>
 
     {(post.prev || post.next) && (
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-gray-100">
