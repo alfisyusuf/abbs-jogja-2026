@@ -18,14 +18,39 @@ if (!page) {
 const bodyHtml = toHtml(page.body)
 ---
 <BaseLayout title={page.title} description={page.seo?.metaDescription || page.subtitle} ogImage={page.seo?.shareImage}>
-  <main class="pt-24 lg:pt-32 pb-20">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-      <h1 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-6">{page.title}</h1>
-      {page.subtitle && <p class="text-lg text-gray-600 leading-relaxed">{page.subtitle}</p>}
-    </div>
+  
+  <!-- Header / Hero Section khusus Halaman -->
+  <header class="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-gray-50">
+    <!-- Dekorasi Blur (Konsisten dengan Beranda) -->
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-[300px] h-[300px] rounded-full bg-abbs-blue blur-[80px] opacity-20 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 w-[200px] h-[200px] rounded-full bg-abbs-maroon blur-[80px] opacity-10 pointer-events-none"></div>
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <article class="prose-abbs max-w-3xl" set:html={bodyHtml} />
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 leading-tight mb-6 tracking-tight">
+        {page.title}
+      </h1>
+      {page.subtitle && (
+        <p class="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+          {page.subtitle}
+        </p>
+      )}
+    </div>
+  </header>
+
+  <!-- Konten Artikel (Overlapping Card) -->
+  <main class="pb-24 lg:pb-32 -mt-12 relative z-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Bungkus dalam kartu putih dengan bayangan -->
+      <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-8 sm:p-12 lg:p-16">
+        
+        <!-- Artikel -->
+        <!-- Tambahkan mx-auto dan max-w-none agar konten memenuhi kartu dengan rapi -->
+        <article class="prose-abbs max-w-none" set:html={bodyHtml} />
+        
+      </div>
+      
     </div>
   </main>
+
 </BaseLayout>
