@@ -22,18 +22,55 @@ function formatDate(dateStr: string) {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid md:grid-cols-3 gap-8">
         {posts.map((post: any) => (
-          <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
-            <a href={`/berita/${post.slug}`}>
-              <div class="relative h-52 overflow-hidden">
-                {post.mainImage && <img src={urlFor(post.mainImage).width(600).height(400).url()} alt={post.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />}
-                {post.category && <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">{post.category}</div>}
+          <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1 flex flex-col h-full">
+            <a href={`/berita/${post.slug}`} class="flex flex-col h-full">
+              
+              {/* Gambar (Dipotong konsisten dan aman untuk Safari) */}
+              <div class="relative h-56 overflow-hidden shrink-0">
+                {post.mainImage && (
+                  <img 
+                    src={urlFor(post.mainImage).width(600).height(400).fit('crop').auto('format').url()} 
+                    alt={post.title} 
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    loading="lazy" 
+                  />
+                )}
+                {post.category && (
+                  <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">
+                    {post.category}
+                  </div>
+                )}
               </div>
-              <div class="p-8">
+
+              {/* Konten Teks */}
+              <div class="p-6 sm:p-8 flex flex-col flex-grow">
+                
+                {/* Tanggal dengan Ikon */}
                 <div class="flex items-center gap-2 text-sm text-gray-500 mb-3 font-medium">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
                   <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
                 </div>
-                <h2 class="font-display text-2xl md:text-3xl font-semibold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors leading-snug">{post.title}</h2>
-                <p class="text-gray-600 text-sm line-clamp-3">{post.excerpt}</p>
+
+                {/* Judul (Dibatasi maksimal 3 baris) */}
+                <h2 class="font-display text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors leading-snug line-clamp-3">
+                  {post.title}
+                </h2>
+
+                {/* Ringkasan (Dibatasi 3 baris, dan mendorong tombol ke bawah) */}
+                <p class="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed flex-grow">
+                  {post.excerpt}
+                </p>
+
+                {/* Tombol Baca (Selalu rata bawah) */}
+                <span class="text-abbs-maroon font-semibold text-sm flex items-center gap-1 mt-auto">
+                  Baca Selengkapnya
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </span>
+                
               </div>
             </a>
           </article>
