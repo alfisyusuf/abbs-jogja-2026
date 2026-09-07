@@ -31,54 +31,54 @@ function formatDate(dateStr: string) {
 ---
 <BaseLayout title="Beranda" description={home?.heroDescription}>
   <!-- Hero -->
-  <main id="konten-utama" class="pt-24 lg:pt-32 pb-24 lg:pb-40 overflow-hidden relative">
+  <main id="konten-utama" class="pt-24 lg:pt-32 pb-24 lg:pb-32 overflow-hidden relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div class="relative z-10 hero-in" style="animation-delay:0ms">
           {(settings?.ppsActive && settings?.ppsBadgeText) && (
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-abbs-blue-dark font-semibold text-sm mb-6 border border-blue-100 shadow-sm">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path></svg>
               {settings.ppsBadgeText}
             </div>
           )}
-          
-          <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 leading-[1.1] mb-6 tracking-tight">
-            {home?.heroHeadline} <span class="text-abbs-blue-dark relative">{home?.heroHighlight}</span>
+
+          <h1 class="font-display text-4xl md:text-5xl lg:text-[3.4rem] font-semibold text-gray-900 leading-[1.08] mb-6 tracking-tight">
+            {home?.heroHeadline} <span class="text-abbs-blue-dark">{home?.heroHighlight}</span>
           </h1>
-          <p class="text-lg text-gray-600 mb-8 leading-relaxed max-w-xl">{home?.heroDescription}</p>
+          <p class="text-lg text-gray-600 mb-9 leading-relaxed max-w-xl">{home?.heroDescription}</p>
           <div class="flex flex-wrap items-center gap-4">
             {home?.heroPrimaryCtaUrl && (
               <a href={home.heroPrimaryCtaUrl} target="_blank" rel="noopener"
-                 class="bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto text-center">
+                 class="bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg shadow-abbs-blue/25 hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto text-center">
                 {home.heroPrimaryCtaLabel}
               </a>
             )}
             {home?.heroSecondaryCtaUrl && (
               <a href={home.heroSecondaryCtaUrl}
-                 class="flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-800 px-6 py-3.5 rounded-full font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 w-full sm:w-auto">
+                 class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-abbs-blue text-gray-700 hover:text-abbs-blue-dark px-6 py-3 rounded-full font-bold transition-all w-full sm:w-auto">
                 {home.heroSecondaryCtaLabel}
               </a>
             )}
           </div>
-          {home?.heroNote && <p class="text-sm text-gray-500 mt-4 text-center sm:text-left">{home.heroNote}</p>}
+          {home?.heroNote && <p class="text-sm text-gray-500 mt-5 text-center sm:text-left">{home.heroNote}</p>}
         </div>
 
-        <div class="relative z-10 mt-8 lg:mt-0 w-full">
-          <div class="relative h-[320px] sm:h-[400px] lg:h-[550px] rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white">
+        <div class="relative z-10 mt-8 lg:mt-0 w-full hero-in" style="animation-delay:120ms">
+          <div class="relative h-[320px] sm:h-[400px] lg:h-[560px] rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white">
             {heroImageUrl && <img src={heroImageUrl} alt="Kegiatan siswa" class="w-full h-full object-cover" loading="eager" />}
-            <div class="absolute inset-0 bg-gradient-to-t from-abbs-blue-dark/40 to-transparent mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-abbs-blue-dark/35 to-transparent mix-blend-multiply"></div>
           </div>
         </div>
       </div>
     </div>
-    <div class="absolute top-0 right-0 -mr-20 lg:-mr-40 -mt-20 lg:-mt-40 w-[300px] lg:w-[500px] h-[300px] lg:h-[500px] rounded-full bg-abbs-blue blur-[80px] lg:blur-[100px] opacity-20 pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 -ml-20 lg:-ml-40 w-[200px] lg:w-[400px] h-[200px] lg:h-[400px] rounded-full bg-abbs-maroon blur-[80px] lg:blur-[120px] opacity-10 pointer-events-none"></div>
+    <!-- Satu aksen dekoratif saja, tidak diulang di tiap section -->
+    <div class="absolute top-0 right-0 -mr-20 lg:-mr-40 -mt-20 lg:-mt-40 w-[300px] lg:w-[560px] h-[300px] lg:h-[560px] rounded-full bg-abbs-blue blur-[90px] lg:blur-[120px] opacity-[0.16] pointer-events-none"></div>
   </main>
 
   <!-- Program Unggulan -->
   <section id="program" class="relative z-20 -mt-4 lg:-mt-12 pb-20 scroll-mt-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
+
       {(home?.programSectionTitle || home?.programEyebrow) && (
         <div class="text-center mb-12 lg:mb-16">
           {home?.programEyebrow && (
@@ -96,7 +96,7 @@ function formatDate(dateStr: string) {
         {(home?.programs || []).map((program: any) => {
           const c = colorMap[program.color] || colorMap.blue
           const svgPath = iconMap[program.icon] || iconMap['book-open']
-          
+
           return (
             <div class="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl border border-gray-100 hover:-translate-y-2 transition-all duration-300 group">
               <div class={`w-16 h-16 ${c.bg} ${c.bgHover} rounded-2xl flex items-center justify-center mb-6 ${c.text} group-hover:text-white transition-colors duration-300`}>
@@ -174,12 +174,12 @@ function formatDate(dateStr: string) {
 
   <!-- Statistik -->
   {home?.stats?.length > 0 && (
-    <section class="py-16 bg-white border-y border-gray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <section class="py-14 bg-white border-y border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 text-center">
         {home.stats.map((s: any) => (
-          <div>
+          <div class="px-2">
             <p class="font-display text-4xl md:text-5xl font-bold text-abbs-blue-dark mb-2">{s.value}</p>
-            <p class="text-gray-500 font-medium">{s.label}</p>
+            <p class="text-gray-500 font-medium text-sm md:text-base">{s.label}</p>
           </div>
         ))}
       </div>
@@ -189,16 +189,11 @@ function formatDate(dateStr: string) {
   <!-- Testimoni -->
   {home?.testimonials?.length > 0 && (
     <section class="py-16 lg:py-28 bg-gray-50 relative overflow-hidden">
-      
-      {/* Ornamen Latar Belakang */}
-      <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div class="absolute -top-24 -right-24 w-96 h-96 bg-abbs-blue rounded-full blur-[120px] opacity-20"></div>
-        <div class="absolute bottom-0 left-1/4 w-72 h-72 bg-abbs-maroon rounded-full blur-[100px] opacity-10"></div>
-      </div>
+
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-abbs-blue rounded-full blur-[120px] opacity-[0.14] pointer-events-none"></div>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Header Testimoni */}
+
         <div class="text-center mb-14 lg:mb-20">
           {home?.testimonialEyebrow && (
             <div class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white text-abbs-blue-dark font-bold mb-5 uppercase tracking-wider text-xs shadow-sm border border-gray-100">
@@ -208,44 +203,35 @@ function formatDate(dateStr: string) {
           )}
           <h2 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight">{home.testimonialSectionTitle}</h2>
         </div>
-        
-        {/* Grid Kartu Testimoni */}
+
         <div class="grid md:grid-cols-3 gap-8">
           {home.testimonials.map((t: any) => (
             <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full group">
-              
-              {/* Ikon Kutip Raksasa (Watermark) */}
+
               <div class="absolute top-8 right-8 text-gray-50 group-hover:text-blue-50 transition-colors duration-500 pointer-events-none">
                 <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                 </svg>
               </div>
 
-              {/* Teks Kutipan */}
               <p class="text-gray-600 leading-relaxed mb-10 italic relative z-10 text-lg flex-grow">"{t.quote}"</p>
-              
-              {/* Area Identitas (Selalu rata bawah berkat flex-grow di atas) */}
+
               <div class="flex items-center gap-4 relative z-10 mt-auto pt-6 border-t border-gray-50">
-                
-                {/* Logika Avatar: Tampilkan Foto ATAU Inisial Berwarna */}
                 {t.photo ? (
-                  <img 
-                    src={urlFor(t.photo).width(120).height(120).fit('crop').auto('format').url()} 
-                    alt={t.name} 
-                    class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-gray-100" 
+                  <img
+                    src={urlFor(t.photo).width(120).height(120).fit('crop').auto('format').url()}
+                    alt={t.name}
+                    class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-gray-100"
                   />
                 ) : (
                   <div class="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-abbs-blue to-abbs-blue-dark flex items-center justify-center text-white font-display font-bold text-xl shadow-md border-2 border-white ring-2 ring-gray-100">
                     {t.name.charAt(0).toUpperCase()}
                   </div>
                 )}
-                
-                {/* Nama & Peran */}
                 <div>
                   <p class="font-bold text-gray-900 text-lg mb-0.5">{t.name}</p>
                   <p class="text-sm text-abbs-blue-dark font-medium">{t.role}</p>
                 </div>
-
               </div>
             </div>
           ))}
@@ -258,7 +244,7 @@ function formatDate(dateStr: string) {
   {(home?.galleryItems?.length > 0 || home?.galleryImages?.length > 0) && (
     <section class="py-16 lg:py-24 bg-white overflow-hidden relative">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         <div class="text-center mb-12">
           {home?.galleryEyebrow && (
             <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
@@ -273,30 +259,21 @@ function formatDate(dateStr: string) {
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {(home.galleryItems || []).map((item: any) => {
             const isVideo = item.mediaType === 'video' && item.videoUrl;
-            
-            // 1. URL untuk Lightbox (Resolusi tinggi, format otomatis)
             const linkHref = isVideo ? item.videoUrl : (item.image ? urlFor(item.image).width(1200).auto('format').url() : '#');
-            
-            // 2. URL untuk Grid (Dipotong persegi, format otomatis aman untuk Safari)
             const gridImgUrl = item.image ? urlFor(item.image).width(600).height(600).fit('crop').auto('format').url() : null;
-            
             const dataTitle = item.title ? `title: ${item.title}` : '';
             const dataGlightbox = `type: ${isVideo ? 'video' : 'image'}; ${dataTitle}`;
-            
+
             return (
               <a href={linkHref} class="glightbox relative rounded-2xl overflow-hidden aspect-square shadow-md group" data-glightbox={dataGlightbox}>
-                
-                {/* Render Gambar Thumbnail */}
                 {gridImgUrl && (
-                  <img 
-                    src={gridImgUrl} 
-                    alt={item.title || 'Galeri SMA ABBS'} 
-                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" 
-                    loading="lazy" 
+                  <img
+                    src={gridImgUrl}
+                    alt={item.title || 'Galeri SMA ABBS'}
+                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                 )}
-                
-                {/* Overlay Play Button khusus untuk Video */}
                 {isVideo && (
                   <div class="absolute inset-0 bg-gray-900/30 flex items-center justify-center transition-colors duration-500 group-hover:bg-gray-900/50">
                     <div class="w-14 h-14 bg-abbs-maroon text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
@@ -304,8 +281,6 @@ function formatDate(dateStr: string) {
                     </div>
                   </div>
                 )}
-                
-                {/* Judul Muncul Saat di-Hover */}
                 {item.title && (
                   <div class="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-gray-800 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 truncate text-center">
                     {item.title}
@@ -337,7 +312,7 @@ function formatDate(dateStr: string) {
           </div>
           <a href="/berita" class="hidden md:inline-flex bg-blue-50 text-abbs-blue-dark px-5 py-2.5 rounded-full font-bold text-sm hover:bg-abbs-blue hover:text-white transition-all">Lihat Semua Berita</a>
         </div>
-        
+
         <div class="grid md:grid-cols-3 gap-8">
           {latestPosts.map((post: any) => (
             <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
@@ -384,7 +359,7 @@ function formatDate(dateStr: string) {
         <div class="space-y-4">
           {home.faqs.map((faq: any) => (
             <details class="group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
-              <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer font-bold text-gray-900 list-none">
+              <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer font-bold text-gray-900 list-none [&::-webkit-details-marker]:hidden">
                 {faq.question}
                 <svg class="w-5 h-5 shrink-0 transition-transform group-open:rotate-180 text-abbs-blue-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
               </summary>
@@ -396,3 +371,18 @@ function formatDate(dateStr: string) {
     </section>
   )}
 </BaseLayout>
+
+<style>
+  /* Satu momen masuk yang terkoordinasi untuk hero saja — bukan animasi
+     berulang di setiap section saat discroll. */
+  .hero-in {
+    animation: heroIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes heroIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-in { animation: none; }
+  }
+</style>

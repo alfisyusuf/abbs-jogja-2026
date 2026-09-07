@@ -1,0 +1,1637 @@
+
+
+========================================
+LOKASI FILE: ./env.d.ts
+========================================
+
+/// <reference path="../.astro/types.d.ts" />
+/// <reference types="astro/client" />
+/// <reference types="@sanity/astro/module" />
+
+========================================
+LOKASI FILE: ./styles/global.css
+========================================
+
+@import "tailwindcss";
+
+/* Ini adalah pengganti file tailwind.config.mjs Anda */
+@theme {
+  --color-abbs-blue: #52B3E6;
+  --color-abbs-blue-dark: #2E86BF;
+  --color-abbs-maroon: #8B2332;
+  
+  --font-display: "Fraunces", serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  
+  --animate-bounce-slow: bounce 3s infinite;
+}
+
+/* === CSS Khusus Anda Sebelumnya === */
+.group:hover .group-hover\:block { display: block; }
+.group:focus-within .group-hover\:block { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce-slow { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+a:focus-visible, button:focus-visible {
+  outline: 3px solid var(--color-abbs-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--color-abbs-blue);
+  color: white;
+  padding: 12px 20px;
+  z-index: 100;
+  font-weight: 700;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+
+/* Gaya konten kaya (Portable Text) untuk Berita & Halaman */
+.prose-abbs h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; color: #111827; margin-top: 2rem; margin-bottom: 1rem; }
+.prose-abbs h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; color: #111827; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+.prose-abbs h4 { font-family: var(--font-display); font-weight: 600; font-size: 1.1rem; color: #111827; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+.prose-abbs p { margin-bottom: 1.25rem; line-height: 1.8; color: #4b5563; }
+.prose-abbs ul { margin-bottom: 1.25rem; padding-left: 1.5rem; list-style: disc; color: #4b5563; }
+.prose-abbs ol { margin-bottom: 1.25rem; padding-left: 1.5rem; list-style: decimal; color: #4b5563; }
+.prose-abbs li { margin-bottom: 0.5rem; line-height: 1.7; }
+.prose-abbs blockquote { border-left: 4px solid var(--color-abbs-blue); background: #eff8fd; padding: 1.25rem 1.5rem; border-radius: 0 1rem 1rem 0; font-style: italic; color: #1f2937; margin: 1.5rem 0; }
+.prose-abbs figure { margin: 1.5rem 0; }
+.prose-abbs img { border-radius: 1.5rem; width: 100%; height: auto; }
+.prose-abbs figcaption { text-align: center; font-size: 0.875rem; color: #9ca3af; margin-top: 0.5rem; font-style: italic; }
+.prose-abbs a { color: var(--color-abbs-blue-dark); text-decoration: underline; font-weight: 600; }
+.prose-abbs strong { color: #111827; }
+
+========================================
+LOKASI FILE: ./components/Footer.astro
+========================================
+
+---
+import {urlFor} from '../lib/sanity/image'
+import {resolveNavHref} from '../lib/nav'
+
+export interface Props {
+  settings: any
+}
+const {settings} = Astro.props
+const logoUrl = settings?.logo ? urlFor(settings.logo).width(96).height(96).url() : null
+const quickLinks = (settings?.mainMenu || []).flatMap((item: any) => (item.children?.length ? item.children : [item]))
+
+const socialIcons: Record<string, string> = {
+  Instagram: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z',
+  Facebook: 'M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z',
+  YouTube: 'M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z',
+  'TikTok': 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v6.76c-.05 2.15-1.14 4.1-2.9 5.25-1.74 1.12-3.95 1.25-5.83.33-1.89-.92-3.21-2.77-3.37-4.86-.16-2.1.84-4.2 2.56-5.41 1.72-1.21 4.01-1.39 5.92-.47v4.11c-1.11-.64-2.58-.69-3.7-.09-1.1.6-1.79 1.79-1.72 3.03.07 1.25.86 2.37 2 2.85 1.15.48 2.53.33 3.53-.4 1-.72 1.57-1.92 1.6-3.15V.02z',
+  'X (Twitter)': 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z',
+}
+---
+<footer class="bg-gray-900 text-gray-300 pt-20 pb-10 border-t-4 border-abbs-blue">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+      <div>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1">
+            {logoUrl
+              ? <img src={logoUrl} alt={`Logo ${settings?.siteTitle}`} class="w-full h-full object-contain" />
+              : <div class="w-full h-full rounded-lg bg-gray-200" />}
+          </div>
+          <div class="flex flex-col">
+            <span class="font-display font-bold text-xl text-white leading-tight">{settings?.siteTitle}</span>
+            {settings?.siteTagline && <span class="text-sm font-semibold text-abbs-blue uppercase tracking-wider">{settings.siteTagline}</span>}
+          </div>
+        </div>
+        {settings?.footerText && <p class="text-gray-400 text-sm leading-relaxed mb-6">{settings.footerText}</p>}
+        <div class="flex gap-4">
+          {(settings?.socialLinks || []).map((s: any) => (
+            <a href={s.url} target="_blank" rel="noopener" aria-label={s.platform} class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-abbs-blue hover:text-white transition-all shadow-md">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d={socialIcons[s.platform] || ''}></path></svg>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-white font-bold text-lg mb-6">Tautan Cepat</h4>
+        <ul class="space-y-3">
+          {quickLinks.map((item: any) => (
+            <li><a href={resolveNavHref(item)} class="text-gray-400 hover:text-abbs-blue transition-colors flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              {item.label}
+            </a></li>
+          ))}
+        </ul>
+      </div>
+
+      {settings?.ppsActive && (
+        <div>
+          <h4 class="text-white font-bold text-lg mb-6">Pendaftaran (PPS)</h4>
+          <p class="text-gray-400 text-sm mb-5 leading-relaxed">Penerimaan Peserta Didik Baru telah dibuka. Dapatkan informasi lengkap dan rincian biaya langsung via WhatsApp.</p>
+          {settings?.whatsappNumber && (
+            <a href={`https://wa.me/${settings.whatsappNumber}?text=Saya%20ingin%20info%20pendaftaran%20PPS`} target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 bg-abbs-blue hover:bg-abbs-blue-dark text-white px-6 py-2.5 rounded-full text-sm font-bold transition-all shadow-md">
+              Info Pendaftaran
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+          )}
+        </div>
+      )}
+
+      <div>
+        <h4 class="text-white font-bold text-lg mb-6">Kontak Kami</h4>
+        <ul class="space-y-4">
+          {settings?.address && (
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-abbs-blue shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span class="text-gray-400 text-sm leading-relaxed">{settings.address}</span>
+            </li>
+          )}
+          {settings?.phone && (
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-abbs-blue shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+              <a href={`tel:${settings.phone.replace(/[^0-9+]/g, '')}`} class="text-gray-400 hover:text-abbs-blue text-sm transition-colors">{settings.phone}</a>
+            </li>
+          )}
+          {settings?.email && (
+            <li class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-abbs-blue shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              <a href={`mailto:${settings.email}`} class="text-gray-400 hover:text-abbs-blue text-sm transition-colors">{settings.email}</a>
+            </li>
+          )}
+        </ul>
+      </div>
+    </div>
+    <div class="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-gray-500 text-sm text-center md:text-left">{settings?.copyrightText}</p>
+    </div>
+  </div>
+</footer>
+
+
+========================================
+LOKASI FILE: ./components/WhatsAppButton.astro
+========================================
+
+---
+export interface Props {
+  whatsappNumber?: string
+  message?: string
+}
+const {whatsappNumber, message} = Astro.props
+const href = whatsappNumber
+  ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message || 'Assalamualaikum, saya ingin bertanya')}`
+  : '#'
+---
+{whatsappNumber && (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener"
+    aria-label="Hubungi kami via WhatsApp"
+    class="fixed bottom-6 right-6 z-50 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-110"
+  >
+    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4C7.24 4 3.34 7.9 3.34 12.71c0 1.5.4 2.96 1.14 4.25L3.27 21l4.15-1.09a8.68 8.68 0 0 0 4.62 1.32h.01c4.81 0 8.72-3.9 8.72-8.71 0-2.33-.9-4.51-2.55-6.15Zm-5.55 13.4h-.01a7.2 7.2 0 0 1-3.68-1.01l-.26-.16-2.74.72.73-2.67-.17-.27a7.24 7.24 0 0 1-1.11-3.86c0-4 3.25-7.25 7.25-7.25a7.2 7.2 0 0 1 5.13 2.13 7.19 7.19 0 0 1 2.12 5.13c0 4-3.25 7.25-7.26 7.25Z"/></svg>
+  </a>
+)}
+
+
+========================================
+LOKASI FILE: ./components/Navbar.astro
+========================================
+
+---
+import {urlFor} from '../lib/sanity/image'
+import {resolveNavHref} from '../lib/nav'
+
+export interface Props {
+  settings: any
+}
+const {settings} = Astro.props
+const menu = settings?.mainMenu || []
+const logoUrl = settings?.logo ? urlFor(settings.logo).width(96).height(96).url() : null
+---
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-12 h-12 flex items-center justify-center overflow-hidden">
+          {logoUrl
+            ? <img src={logoUrl} alt={`Logo ${settings?.siteTitle}`} class="w-full h-full object-contain" />
+            : <div class="w-12 h-12 rounded-xl bg-abbs-blue/10" />}
+        </div>
+        <div class="flex flex-col">
+          <span class="font-display font-bold text-xl text-gray-900 leading-tight">{settings?.siteTitle}</span>
+          {settings?.siteTagline && (
+            <span class="text-sm font-semibold text-abbs-blue-dark uppercase tracking-wider">{settings.siteTagline}</span>
+          )}
+        </div>
+      </a>
+
+      <div class="hidden lg:flex items-center space-x-8 h-full">
+        {menu.map((item: any) => (
+          item.children?.length ? (
+            <div class="relative group h-full flex items-center">
+              <button class="text-gray-600 group-hover:text-abbs-blue-dark font-medium flex items-center gap-1 transition-colors h-full" aria-haspopup="true" aria-expanded="false">
+                {item.label}
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="absolute top-20 left-0 pt-4 w-56 hidden group-hover:block transition-all">
+                <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-50">
+                  {item.children.map((child: any) => (
+                    <a href={resolveNavHref(child)} class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-abbs-blue-dark">{child.label}</a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <a href={resolveNavHref(item)} class="text-gray-600 hover:text-abbs-blue-dark font-medium transition-colors">{item.label}</a>
+          )
+        ))}
+      </div>
+
+      <div class="hidden lg:flex items-center h-full">
+        {settings?.navCtaUrl && (
+          <a href={settings.navCtaUrl} target="_blank" rel="noopener"
+             class="flex items-center gap-2 bg-abbs-blue hover:bg-abbs-blue-dark text-white px-6 py-2.5 rounded-full font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4C7.24 4 3.34 7.9 3.34 12.71c0 1.5.4 2.96 1.14 4.25L3.27 21l4.15-1.09a8.68 8.68 0 0 0 4.62 1.32h.01c4.81 0 8.72-3.9 8.72-8.71 0-2.33-.9-4.51-2.55-6.15Z"/></svg>
+            {settings.navCtaLabel}
+          </a>
+        )}
+      </div>
+
+      <div class="lg:hidden flex items-center">
+        <button id="mobile-menu-btn" class="text-gray-600 hover:text-abbs-blue-dark focus:outline-none" aria-expanded="false" aria-controls="mobile-menu" aria-label="Buka menu navigasi">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full transition-all">
+    <div class="px-4 pt-2 pb-6 space-y-2">
+      {menu.map((item: any) => (
+        item.children?.length ? (
+          <div>
+            <p class="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">{item.label}</p>
+            {item.children.map((child: any) => (
+              <a href={resolveNavHref(child)} class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-abbs-blue-dark hover:bg-gray-50 rounded-lg">{child.label}</a>
+            ))}
+          </div>
+        ) : (
+          <a href={resolveNavHref(item)} class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-abbs-blue-dark hover:bg-gray-50 rounded-lg">{item.label}</a>
+        )
+      ))}
+      {settings?.navCtaUrl && (
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <a href={settings.navCtaUrl} target="_blank" rel="noopener" class="flex items-center justify-center gap-2 bg-abbs-blue text-white px-6 py-3 rounded-xl font-semibold shadow-md">
+            {settings.navCtaLabel}
+          </a>
+        </div>
+      )}
+    </div>
+  </div>
+</nav>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn')
+  const menu = document.getElementById('mobile-menu')
+  btn?.addEventListener('click', () => {
+    const isOpen = menu?.classList.toggle('hidden') === false
+    btn.setAttribute('aria-expanded', String(isOpen))
+  })
+  menu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      menu.classList.add('hidden')
+      btn?.setAttribute('aria-expanded', 'false')
+    })
+  })
+</script>
+
+
+========================================
+LOKASI FILE: ./layouts/BaseLayout.astro
+========================================
+
+---
+import Navbar from '../components/Navbar.astro'
+import Footer from '../components/Footer.astro'
+import WhatsAppButton from '../components/WhatsAppButton.astro'
+import {urlFor} from '../lib/sanity/image'
+import {getSiteSettings} from '../lib/sanity/queries'
+import '../styles/global.css'
+
+export interface Props {
+  title: string
+  description?: string
+  ogImage?: any
+}
+const {title, description, ogImage} = Astro.props
+const settings = await getSiteSettings()
+
+const pageTitle = `${title} — ${settings?.siteTitle || ''}`
+const metaDescription = description || settings?.seoDescription || ''
+const shareImage = ogImage
+  ? urlFor(ogImage).width(1200).url()
+  : settings?.logo
+    ? urlFor(settings.logo).width(1200).url()
+    : undefined
+---
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{pageTitle}</title>
+
+  <meta name="description" content={metaDescription} />
+  {settings?.seoKeywords && <meta name="keywords" content={settings.seoKeywords} />}
+  <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={metaDescription} />
+  {shareImage && <meta property="og:image" content={shareImage} />}
+  <meta property="og:locale" content="id_ID" />
+
+  {settings?.favicon && <link rel="icon" href={urlFor(settings.favicon).width(64).url()} />}
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- CSS GLightbox -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+</head>
+<body class="bg-gray-50 font-sans antialiased text-gray-800">
+  <a href="#konten-utama" class="skip-link">Langsung ke konten</a>
+
+  <Navbar settings={settings} />
+
+  <slot />
+
+  <Footer settings={settings} />
+
+  <WhatsAppButton whatsappNumber={settings?.whatsappNumber} message={settings?.whatsappFloatMessage} />
+
+  <!-- Script GLightbox -->
+  <script is:inline src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+      const lightbox = GLightbox({ 
+        touchNavigation: true, 
+        loop: true, 
+        autoplayVideos: true 
+      });
+    });
+  </script>
+</body>
+</html>
+
+========================================
+LOKASI FILE: ./lib/nav.ts
+========================================
+
+export function resolveNavHref(item: any): string {
+  if (!item) return '#'
+  switch (item.linkType) {
+    case 'internal':
+      if (!item.internalHref) return '#'
+      return item.internalType === 'post' ? `/berita/${item.internalHref}` : `/${item.internalHref}`
+    case 'anchor':
+      return `/#${(item.anchor || '').replace(/^#/, '')}`
+    case 'external':
+    default:
+      return item.externalUrl || '#'
+  }
+}
+
+
+========================================
+LOKASI FILE: ./lib/sanity/image.ts
+========================================
+
+import imageUrlBuilder from '@sanity/image-url'
+import {sanityClient} from './client'
+
+const builder = imageUrlBuilder(sanityClient)
+
+/** Pakai: urlFor(image).width(800).url() */
+export function urlFor(source: any) {
+  return builder.image(source)
+}
+
+
+========================================
+LOKASI FILE: ./lib/sanity/queries.ts
+========================================
+
+import {sanityClient} from './client'
+
+const navItemFields = `
+  label, linkType, anchor, externalUrl,
+  "internalHref": internalPage->slug.current,
+  "internalType": internalPage->_type,
+  children[]{ label, linkType, anchor, externalUrl, "internalHref": internalPage->slug.current, "internalType": internalPage->_type }
+`
+
+export async function getSiteSettings() {
+  return sanityClient.fetch(`*[_type == "siteSettings"][0]{
+    siteTitle, siteTagline, logo, favicon, footerText, copyrightText,
+    mainMenu[]{ ${navItemFields} },
+    navCtaLabel, navCtaUrl,
+    phone, whatsappNumber, email, address, socialLinks,
+    whatsappFloatMessage, ppsActive, ppsBadgeText,
+    seoDescription, seoKeywords
+  }`)
+}
+
+export async function getHomePage() {
+  return sanityClient.fetch(`*[_type == "homePage"][0]`)
+}
+
+export async function getGuruKaryawanPage() {
+  return sanityClient.fetch(`*[_type == "guruKaryawanPage"][0]`)
+}
+
+export async function getStaffMembers() {
+  return sanityClient.fetch(`*[_type == "staffMember"] | order(order asc){
+    name, group, position, photo, bio, email
+  }`)
+}
+
+export async function getLatestPosts(limit = 3) {
+  return sanityClient.fetch(
+    `*[_type == "post"] | order(publishedAt desc)[0...$limit]{
+      title, "slug": slug.current, mainImage, excerpt, publishedAt,
+      "category": category->title
+    }`,
+    {limit}
+  )
+}
+
+export async function getAllPostsPaged(start: number, end: number) {
+  return sanityClient.fetch(
+    `*[_type == "post"] | order(publishedAt desc)[$start...$end]{
+      title, "slug": slug.current, mainImage, excerpt, publishedAt,
+      "category": category->title
+    }`,
+    {start, end}
+  )
+}
+
+export async function getAllPostSlugs() {
+  return sanityClient.fetch(`*[_type == "post"]{"slug": slug.current}`)
+}
+
+export async function getPostCount() {
+  return sanityClient.fetch(`count(*[_type == "post"])`)
+}
+
+export async function getPostBySlug(slug: string) {
+  return sanityClient.fetch(
+    `*[_type == "post" && slug.current == $slug][0]{
+      title, mainImage, excerpt, publishedAt, body, tags, seo,
+      "category": category->{title, "slug": slug.current},
+      "author": author->{name, image, bio},
+      "prev": *[_type == "post" && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{title, "slug": slug.current},
+      "next": *[_type == "post" && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{title, "slug": slug.current}
+    }`,
+    {slug}
+  )
+}
+
+export async function getRelatedPosts(categoryTitle: string, excludeSlug: string, limit = 2) {
+  return sanityClient.fetch(
+    `*[_type == "post" && category->title == $categoryTitle && slug.current != $excludeSlug] | order(publishedAt desc)[0...$limit]{
+      title, "slug": slug.current, mainImage, publishedAt
+    }`,
+    {categoryTitle, excludeSlug, limit}
+  )
+}
+
+export async function getAllCategories() {
+  return sanityClient.fetch(`*[_type == "category"] | order(title asc){title, "slug": slug.current}`)
+}
+
+export async function getAllPageSlugs() {
+  return sanityClient.fetch(`*[_type == "page"]{"slug": slug.current}`)
+}
+
+export async function getPageBySlug(slug: string) {
+  return sanityClient.fetch(`*[_type == "page" && slug.current == $slug][0]`, {slug})
+}
+
+
+========================================
+LOKASI FILE: ./lib/sanity/client.ts
+========================================
+
+import { sanityClient } from "sanity:client";
+
+// Ekspor ulang agar file lain (seperti queries.ts dan image.ts) 
+// tetap berfungsi tanpa perlu diubah kodenya.
+export { sanityClient };
+
+========================================
+LOKASI FILE: ./lib/sanity/portableText.ts
+========================================
+
+import {urlFor} from './image'
+
+/**
+ * Serializer ringan Portable Text -> HTML. Cukup untuk kebutuhan blockContent
+ * kita (heading, paragraf, list, quote, bold/italic/underline, link, gambar).
+ * Hasilnya dirender lewat `<Fragment set:html={toHtml(body)} />` di halaman.
+ */
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function renderSpan(child: any, markDefs: any[]) {
+  let text = escapeHtml(child.text || '')
+  for (const mark of child.marks || []) {
+    const def = markDefs.find((d: any) => d._key === mark)
+    if (def?._type === 'link') {
+      const target = def.blank ? ' target="_blank" rel="noopener"' : ''
+      text = `<a href="${def.href}"${target}>${text}</a>`
+    } else if (mark === 'strong') {
+      text = `<strong>${text}</strong>`
+    } else if (mark === 'em') {
+      text = `<em>${text}</em>`
+    } else if (mark === 'underline') {
+      text = `<span class="underline">${text}</span>`
+    }
+  }
+  return text
+}
+
+export function toHtml(blocks: any[] = []): string {
+  let html = ''
+  let listType: 'bullet' | 'number' | null = null
+
+  const closeList = () => {
+    if (listType) {
+      html += listType === 'bullet' ? '</ul>' : '</ol>'
+      listType = null
+    }
+  }
+
+  for (const block of blocks || []) {
+    if (block._type === 'image') {
+      closeList()
+      const src = urlFor(block).width(1200).url()
+      const alt = escapeHtml(block.alt || '')
+      html += `<figure><img src="${src}" alt="${alt}" loading="lazy" />${
+        block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : ''
+      }</figure>`
+      continue
+    }
+
+    if (block._type !== 'block') continue
+
+    const inner = (block.children || []).map((c: any) => renderSpan(c, block.markDefs || [])).join('')
+
+    if (block.listItem) {
+      if (listType !== block.listItem) {
+        closeList()
+        html += block.listItem === 'bullet' ? '<ul>' : '<ol>'
+        listType = block.listItem
+      }
+      html += `<li>${inner}</li>`
+      continue
+    }
+
+    closeList()
+
+    switch (block.style) {
+      case 'h2':
+        html += `<h2>${inner}</h2>`
+        break
+      case 'h3':
+        html += `<h3>${inner}</h3>`
+        break
+      case 'h4':
+        html += `<h4>${inner}</h4>`
+        break
+      case 'blockquote':
+        html += `<blockquote>${inner}</blockquote>`
+        break
+      default:
+        html += `<p>${inner}</p>`
+    }
+  }
+  closeList()
+  return html
+}
+
+
+========================================
+LOKASI FILE: ./pages/404.astro
+========================================
+
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+<BaseLayout title="Halaman Tidak Ditemukan">
+  <main class="pt-32 pb-24 text-center px-4">
+    <p class="font-display text-7xl font-bold text-abbs-blue-dark mb-4">404</p>
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">Halaman yang Anda cari tidak ditemukan</h1>
+    <a href="/" class="inline-flex bg-abbs-blue hover:bg-abbs-blue-dark text-white px-6 py-3 rounded-full font-bold transition-all">Kembali ke Beranda</a>
+  </main>
+</BaseLayout>
+
+
+========================================
+LOKASI FILE: ./pages/index.astro
+========================================
+
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {urlFor} from '../lib/sanity/image'
+import {getHomePage, getLatestPosts, getSiteSettings} from '../lib/sanity/queries'
+
+const home = await getHomePage()
+const settings = await getSiteSettings()
+const latestPosts = await getLatestPosts(3)
+
+const colorMap: Record<string, {bg: string; bgHover: string; text: string}> = {
+  blue: {bg: 'bg-blue-50', bgHover: 'group-hover:bg-abbs-blue', text: 'text-abbs-blue-dark'},
+  maroon: {bg: 'bg-red-50', bgHover: 'group-hover:bg-abbs-maroon', text: 'text-abbs-maroon'},
+  emerald: {bg: 'bg-emerald-50', bgHover: 'group-hover:bg-emerald-500', text: 'text-emerald-600'},
+}
+
+const iconMap: Record<string, string> = {
+  'academic-cap': '<path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />',
+  'bolt': '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />',
+  'book-open': '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />',
+  'star': '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />',
+  'globe': '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />'
+}
+
+const heroImageUrl = home?.heroImage ? urlFor(home.heroImage).width(900).url() : null
+const aboutImg1 = home?.aboutImagePrimary ? urlFor(home.aboutImagePrimary).width(800).url() : null
+const aboutImg2 = home?.aboutImageSecondary ? urlFor(home.aboutImageSecondary).width(600).url() : null
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+}
+---
+<BaseLayout title="Beranda" description={home?.heroDescription}>
+  <!-- Hero -->
+  <main id="konten-utama" class="pt-24 lg:pt-32 pb-24 lg:pb-40 overflow-hidden relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="relative z-10">
+          {(settings?.ppsActive && settings?.ppsBadgeText) && (
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-abbs-blue-dark font-semibold text-sm mb-6 border border-blue-100 shadow-sm">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path></svg>
+              {settings.ppsBadgeText}
+            </div>
+          )}
+          
+          <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 leading-[1.1] mb-6 tracking-tight">
+            {home?.heroHeadline} <span class="text-abbs-blue-dark relative">{home?.heroHighlight}</span>
+          </h1>
+          <p class="text-lg text-gray-600 mb-8 leading-relaxed max-w-xl">{home?.heroDescription}</p>
+          <div class="flex flex-wrap items-center gap-4">
+            {home?.heroPrimaryCtaUrl && (
+              <a href={home.heroPrimaryCtaUrl} target="_blank" rel="noopener"
+                 class="bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto text-center">
+                {home.heroPrimaryCtaLabel}
+              </a>
+            )}
+            {home?.heroSecondaryCtaUrl && (
+              <a href={home.heroSecondaryCtaUrl}
+                 class="flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-800 px-6 py-3.5 rounded-full font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 w-full sm:w-auto">
+                {home.heroSecondaryCtaLabel}
+              </a>
+            )}
+          </div>
+          {home?.heroNote && <p class="text-sm text-gray-500 mt-4 text-center sm:text-left">{home.heroNote}</p>}
+        </div>
+
+        <div class="relative z-10 mt-8 lg:mt-0 w-full">
+          <div class="relative h-[320px] sm:h-[400px] lg:h-[550px] rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white">
+            {heroImageUrl && <img src={heroImageUrl} alt="Kegiatan siswa" class="w-full h-full object-cover" loading="eager" />}
+            <div class="absolute inset-0 bg-gradient-to-t from-abbs-blue-dark/40 to-transparent mix-blend-multiply"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="absolute top-0 right-0 -mr-20 lg:-mr-40 -mt-20 lg:-mt-40 w-[300px] lg:w-[500px] h-[300px] lg:h-[500px] rounded-full bg-abbs-blue blur-[80px] lg:blur-[100px] opacity-20 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 lg:-ml-40 w-[200px] lg:w-[400px] h-[200px] lg:h-[400px] rounded-full bg-abbs-maroon blur-[80px] lg:blur-[120px] opacity-10 pointer-events-none"></div>
+  </main>
+
+  <!-- Program Unggulan -->
+  <section id="program" class="relative z-20 -mt-4 lg:-mt-12 pb-20 scroll-mt-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      {(home?.programSectionTitle || home?.programEyebrow) && (
+        <div class="text-center mb-12 lg:mb-16">
+          {home?.programEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              {home.programEyebrow}
+            </div>
+          )}
+          {home?.programSectionTitle && <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.programSectionTitle}</h2>}
+          {home?.programDescription && <p class="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">{home.programDescription}</p>}
+        </div>
+      )}
+
+      <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
+        {(home?.programs || []).map((program: any) => {
+          const c = colorMap[program.color] || colorMap.blue
+          const svgPath = iconMap[program.icon] || iconMap['book-open']
+          
+          return (
+            <div class="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl border border-gray-100 hover:-translate-y-2 transition-all duration-300 group">
+              <div class={`w-16 h-16 ${c.bg} ${c.bgHover} rounded-2xl flex items-center justify-center mb-6 ${c.text} group-hover:text-white transition-colors duration-300`}>
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <Fragment set:html={svgPath} />
+                </svg>
+              </div>
+              <h3 class="font-display text-2xl font-semibold text-gray-900 mb-3">{program.title}</h3>
+              <p class="text-gray-600 leading-relaxed mb-4">{program.description}</p>
+              {program.ctaUrl && (
+                <a href={program.ctaUrl} target="_blank" rel="noopener" class={`${c.text} font-semibold hover:text-abbs-maroon flex items-center gap-1 transition-colors`}>
+                  {program.ctaText}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </a>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- Tentang Kami -->
+  <section id="tentang-kami" class="py-16 lg:py-24 bg-gray-50 overflow-hidden scroll-mt-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+        <div class="relative">
+          <div class="absolute -top-6 -left-6 w-32 h-32 bg-blue-50 rounded-3xl -z-10"></div>
+          {aboutImg1 && (
+            <div class="w-4/5 rounded-3xl overflow-hidden shadow-xl border-4 border-white z-10 relative">
+              <img src={aboutImg1} alt="Kegiatan sekolah" class="w-full h-auto object-cover aspect-[4/3]" loading="lazy" />
+            </div>
+          )}
+          {aboutImg2 && (
+            <div class="absolute -bottom-10 right-0 w-1/2 rounded-3xl overflow-hidden shadow-2xl border-8 border-white z-20 hover:scale-105 transition-transform duration-500">
+              <img src={aboutImg2} alt="Kegiatan siswa" class="w-full h-auto object-cover aspect-square" loading="lazy" />
+            </div>
+          )}
+          {home?.aboutBadgeText && (
+            <div class="absolute top-1/4 -right-8 bg-white p-4 rounded-2xl shadow-lg border border-gray-100 flex items-center gap-3 z-30 animate-bounce-slow">
+              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xl">A</div>
+              <div>
+                <p class="text-sm font-bold text-gray-800">{home.aboutBadgeText}</p>
+                <p class="text-xs text-gray-500">{home.aboutBadgeSubtext}</p>
+              </div>
+            </div>
+          )}
+        </div>
+        <div class="mt-12 lg:mt-0 lg:pl-8">
+          {home?.aboutEyebrow && (
+            <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              {home.aboutEyebrow}
+            </div>
+          )}
+          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-6 leading-tight">{home?.aboutTitle}</h2>
+          <p class="text-gray-600 leading-relaxed mb-8 text-lg">{home?.aboutDescription}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+            {(home?.aboutFeatures || []).map((f: any) => (
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-abbs-blue-dark flex items-center justify-center shrink-0">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-900 text-lg">{f.title}</h4>
+                  <p class="text-sm text-gray-500">{f.subtitle}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Statistik -->
+  {home?.stats?.length > 0 && (
+    <section class="py-16 bg-white border-y border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        {home.stats.map((s: any) => (
+          <div>
+            <p class="font-display text-4xl md:text-5xl font-bold text-abbs-blue-dark mb-2">{s.value}</p>
+            <p class="text-gray-500 font-medium">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- Testimoni -->
+  {home?.testimonials?.length > 0 && (
+    <section class="py-16 lg:py-28 bg-gray-50 relative overflow-hidden">
+      
+      {/* Ornamen Latar Belakang */}
+      <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-abbs-blue rounded-full blur-[120px] opacity-20"></div>
+        <div class="absolute bottom-0 left-1/4 w-72 h-72 bg-abbs-maroon rounded-full blur-[100px] opacity-10"></div>
+      </div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Header Testimoni */}
+        <div class="text-center mb-14 lg:mb-20">
+          {home?.testimonialEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white text-abbs-blue-dark font-bold mb-5 uppercase tracking-wider text-xs shadow-sm border border-gray-100">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+              {home.testimonialEyebrow}
+            </div>
+          )}
+          <h2 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight">{home.testimonialSectionTitle}</h2>
+        </div>
+        
+        {/* Grid Kartu Testimoni */}
+        <div class="grid md:grid-cols-3 gap-8">
+          {home.testimonials.map((t: any) => (
+            <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full group">
+              
+              {/* Ikon Kutip Raksasa (Watermark) */}
+              <div class="absolute top-8 right-8 text-gray-50 group-hover:text-blue-50 transition-colors duration-500 pointer-events-none">
+                <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+              </div>
+
+              {/* Teks Kutipan */}
+              <p class="text-gray-600 leading-relaxed mb-10 italic relative z-10 text-lg flex-grow">"{t.quote}"</p>
+              
+              {/* Area Identitas (Selalu rata bawah berkat flex-grow di atas) */}
+              <div class="flex items-center gap-4 relative z-10 mt-auto pt-6 border-t border-gray-50">
+                
+                {/* Logika Avatar: Tampilkan Foto ATAU Inisial Berwarna */}
+                {t.photo ? (
+                  <img 
+                    src={urlFor(t.photo).width(120).height(120).fit('crop').auto('format').url()} 
+                    alt={t.name} 
+                    class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-gray-100" 
+                  />
+                ) : (
+                  <div class="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-abbs-blue to-abbs-blue-dark flex items-center justify-center text-white font-display font-bold text-xl shadow-md border-2 border-white ring-2 ring-gray-100">
+                    {t.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                
+                {/* Nama & Peran */}
+                <div>
+                  <p class="font-bold text-gray-900 text-lg mb-0.5">{t.name}</p>
+                  <p class="text-sm text-abbs-blue-dark font-medium">{t.role}</p>
+                </div>
+
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Galeri & Lightbox (Support Foto & Video) -->
+  {(home?.galleryItems?.length > 0 || home?.galleryImages?.length > 0) && (
+    <section class="py-16 lg:py-24 bg-white overflow-hidden relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        <div class="text-center mb-12">
+          {home?.galleryEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              {home.galleryEyebrow}
+            </div>
+          )}
+          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-4 leading-tight">{home.gallerySectionTitle}</h2>
+          {home?.galleryDescription && <p class="text-gray-600 max-w-2xl mx-auto text-lg">{home.galleryDescription}</p>}
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {(home.galleryItems || []).map((item: any) => {
+            const isVideo = item.mediaType === 'video' && item.videoUrl;
+            
+            // 1. URL untuk Lightbox (Resolusi tinggi, format otomatis)
+            const linkHref = isVideo ? item.videoUrl : (item.image ? urlFor(item.image).width(1200).auto('format').url() : '#');
+            
+            // 2. URL untuk Grid (Dipotong persegi, format otomatis aman untuk Safari)
+            const gridImgUrl = item.image ? urlFor(item.image).width(600).height(600).fit('crop').auto('format').url() : null;
+            
+            const dataTitle = item.title ? `title: ${item.title}` : '';
+            const dataGlightbox = `type: ${isVideo ? 'video' : 'image'}; ${dataTitle}`;
+            
+            return (
+              <a href={linkHref} class="glightbox relative rounded-2xl overflow-hidden aspect-square shadow-md group" data-glightbox={dataGlightbox}>
+                
+                {/* Render Gambar Thumbnail */}
+                {gridImgUrl && (
+                  <img 
+                    src={gridImgUrl} 
+                    alt={item.title || 'Galeri SMA ABBS'} 
+                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" 
+                    loading="lazy" 
+                  />
+                )}
+                
+                {/* Overlay Play Button khusus untuk Video */}
+                {isVideo && (
+                  <div class="absolute inset-0 bg-gray-900/30 flex items-center justify-center transition-colors duration-500 group-hover:bg-gray-900/50">
+                    <div class="w-14 h-14 bg-abbs-maroon text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Judul Muncul Saat di-Hover */}
+                {item.title && (
+                  <div class="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-gray-800 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 truncate text-center">
+                    {item.title}
+                  </div>
+                )}
+              </a>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Berita Terkini -->
+  {latestPosts?.length > 0 && (
+    <section id="berita" class="py-16 lg:py-24 bg-gray-50 relative scroll-mt-24">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
+            {home?.beritaEyebrow && (
+              <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+                {home.beritaEyebrow}
+              </div>
+            )}
+            <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
+              {home?.beritaTitle || 'Berita & Agenda'}
+            </h2>
+          </div>
+          <a href="/berita" class="hidden md:inline-flex bg-blue-50 text-abbs-blue-dark px-5 py-2.5 rounded-full font-bold text-sm hover:bg-abbs-blue hover:text-white transition-all">Lihat Semua Berita</a>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+          {latestPosts.map((post: any) => (
+            <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
+              <a href={`/berita/${post.slug}`}>
+                <div class="relative h-52 overflow-hidden">
+                  {post.mainImage && <img src={urlFor(post.mainImage).width(600).height(400).url()} alt={post.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />}
+                  {post.category && <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">{post.category}</div>}
+                </div>
+                <div class="p-8">
+                  <div class="flex items-center gap-2 text-sm text-gray-500 mb-3 font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                  </div>
+                  <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors line-clamp-2">{post.title}</h3>
+                  <p class="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed">{post.excerpt}</p>
+                  <span class="text-abbs-maroon font-semibold text-sm flex items-center gap-1">Baca Selengkapnya
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                  </span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+        <div class="mt-10 text-center md:hidden">
+          <a href="/berita" class="inline-flex bg-blue-50 text-abbs-blue-dark px-6 py-3 rounded-full font-bold transition-all w-full justify-center">Lihat Semua Berita</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ -->
+  {home?.faqs?.length > 0 && (
+    <section id="faq" class="py-16 lg:py-24 bg-white scroll-mt-24">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          {home?.faqEyebrow && (
+            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              {home.faqEyebrow}
+            </div>
+          )}
+          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.faqSectionTitle}</h2>
+        </div>
+        <div class="space-y-4">
+          {home.faqs.map((faq: any) => (
+            <details class="group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+              <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer font-bold text-gray-900 list-none">
+                {faq.question}
+                <svg class="w-5 h-5 shrink-0 transition-transform group-open:rotate-180 text-abbs-blue-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </summary>
+              <div class="px-6 pb-6 text-gray-600 leading-relaxed">{faq.answer}</div>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+========================================
+LOKASI FILE: ./pages/[slug].astro
+========================================
+
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {toHtml} from '../lib/sanity/portableText'
+import {getAllPageSlugs, getPageBySlug} from '../lib/sanity/queries'
+
+export async function getStaticPaths() {
+  const slugs = await getAllPageSlugs()
+  return slugs.map((s: any) => ({params: {slug: s.slug}}))
+}
+
+const {slug} = Astro.params
+const page = await getPageBySlug(slug as string)
+
+if (!page) {
+  return Astro.redirect('/404')
+}
+
+const bodyHtml = toHtml(page.body)
+---
+<BaseLayout title={page.title} description={page.seo?.metaDescription || page.subtitle} ogImage={page.seo?.shareImage}>
+  
+  <!-- Header / Hero Section khusus Halaman -->
+  <header class="relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden bg-gray-50">
+    <!-- Dekorasi Blur (Konsisten dengan Beranda) -->
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-[300px] h-[300px] rounded-full bg-abbs-blue blur-[80px] opacity-20 pointer-events-none"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 w-[200px] h-[200px] rounded-full bg-abbs-maroon blur-[80px] opacity-10 pointer-events-none"></div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-900 leading-tight mb-6 tracking-tight">
+        {page.title}
+      </h1>
+      {page.subtitle && (
+        <p class="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto">
+          {page.subtitle}
+        </p>
+      )}
+    </div>
+  </header>
+
+  <!-- Konten Artikel (Overlapping Card) -->
+  <main class="pb-24 lg:pb-32 -mt-12 relative z-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Bungkus dalam kartu putih dengan bayangan -->
+      <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-8 sm:p-12 lg:p-16">
+        
+        <!-- Artikel -->
+        <!-- Tambahkan mx-auto dan max-w-none agar konten memenuhi kartu dengan rapi -->
+        <article class="prose-abbs max-w-none" set:html={bodyHtml} />
+        
+      </div>
+      
+    </div>
+  </main>
+
+</BaseLayout>
+
+========================================
+LOKASI FILE: ./pages/berita/index.astro
+========================================
+
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {urlFor} from '../../lib/sanity/image'
+import {getAllPostsPaged, getPostCount} from '../../lib/sanity/queries'
+
+const PER_PAGE = 9
+const total = await getPostCount()
+const posts = await getAllPostsPaged(0, PER_PAGE)
+const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+}
+---
+<BaseLayout title="Berita & Agenda" description="Berita, agenda, dan pengumuman terbaru dari sekolah.">
+  <main class="pt-24 lg:pt-32 pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-14">
+      <h1 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-4">Berita & Agenda</h1>
+      <p class="text-lg text-gray-600 leading-relaxed">Kabar terbaru seputar kegiatan, prestasi, dan pengumuman sekolah.</p>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        {posts.map((post: any) => (
+          <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1 flex flex-col h-full">
+            <a href={`/berita/${post.slug}`} class="flex flex-col h-full">
+              
+              {/* Gambar (Dipotong konsisten dan aman untuk Safari) */}
+              <div class="relative h-56 overflow-hidden shrink-0">
+                {post.mainImage && (
+                  <img 
+                    src={urlFor(post.mainImage).width(600).height(400).fit('crop').auto('format').url()} 
+                    alt={post.title} 
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                    loading="lazy" 
+                  />
+                )}
+                {post.category && (
+                  <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">
+                    {post.category}
+                  </div>
+                )}
+              </div>
+
+              {/* Konten Teks */}
+              <div class="p-6 sm:p-8 flex flex-col flex-grow">
+                
+                {/* Tanggal dengan Ikon */}
+                <div class="flex items-center gap-2 text-sm text-gray-500 mb-3 font-medium">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                </div>
+
+                {/* Judul (Dibatasi maksimal 3 baris) */}
+                <h2 class="font-display text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors leading-snug line-clamp-3">
+                  {post.title}
+                </h2>
+
+                {/* Ringkasan (Dibatasi 3 baris, dan mendorong tombol ke bawah) */}
+                <p class="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed flex-grow">
+                  {post.excerpt}
+                </p>
+
+                {/* Tombol Baca (Selalu rata bawah) */}
+                <span class="text-abbs-maroon font-semibold text-sm flex items-center gap-1 mt-auto">
+                  Baca Selengkapnya
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </span>
+                
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div class="mt-14 flex items-center justify-center gap-2">
+          <span class="w-10 h-10 rounded-full bg-abbs-blue text-white flex items-center justify-center font-bold">1</span>
+          {Array.from({length: totalPages - 1}).map((_, i) => (
+            <a href={`/berita/halaman/${i + 2}`} class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark transition-colors font-bold">{i + 2}</a>
+          ))}
+        </div>
+      )}
+    </div>
+  </main>
+</BaseLayout>
+
+
+========================================
+LOKASI FILE: ./pages/berita/[slug].astro
+========================================
+
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {urlFor} from '../../lib/sanity/image'
+import {toHtml} from '../../lib/sanity/portableText'
+import {getAllPostSlugs, getPostBySlug, getRelatedPosts, getAllCategories, getSiteSettings} from '../../lib/sanity/queries'
+
+export async function getStaticPaths() {
+  const slugs = await getAllPostSlugs()
+  return slugs.map((s: any) => ({params: {slug: s.slug}}))
+}
+
+const {slug} = Astro.params
+const post = await getPostBySlug(slug as string)
+const settings = await getSiteSettings()
+
+if (!post) {
+  return Astro.redirect('/404')
+}
+
+const related = post.category ? await getRelatedPosts(post.category.title, slug as string, 2) : []
+const categories = await getAllCategories()
+
+const mainImageUrl = post.mainImage ? urlFor(post.mainImage).width(1600).height(700).url() : null
+const bodyHtml = toHtml(post.body)
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+}
+
+const estimatedReadMinutes = Math.max(1, Math.round((post.body || []).filter((b: any) => b._type === 'block').reduce((acc: number, b: any) => acc + (b.children?.map((c: any) => c.text).join(' ').split(/\s+/).length || 0), 0) / 200))
+
+// Mengambil pesan default dari CMS, dengan teks cadangan jika di CMS kosong
+const waMessage = settings?.whatsappFloatMessage || 'Assalamualaikum, saya ingin bertanya tentang program SMA ABBS Yogyakarta';
+---
+<BaseLayout title={post.title} description={post.seo?.metaDescription || post.excerpt} ogImage={post.seo?.shareImage || post.mainImage}>
+  <main class="pt-24 lg:pt-32 pb-20">
+
+    <!-- Breadcrumb -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-gray-500 font-medium">
+        <a href="/" class="hover:text-abbs-blue-dark transition-colors">Beranda</a>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <a href="/berita" class="hover:text-abbs-blue-dark transition-colors">Berita</a>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <span class="text-gray-800 truncate">{post.title}</span>
+      </nav>
+    </div>
+
+    <!-- Header artikel -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {post.category && (
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-abbs-blue-dark font-bold text-xs uppercase tracking-wider mb-5 border border-blue-100">
+          {post.category.title}
+        </div>
+      )}
+      <h1 class="font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 leading-tight mb-6">{post.title}</h1>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-500 font-medium pb-8 border-b border-gray-100">
+        {post.author && (
+          <div class="flex items-center gap-2">
+            {post.author.image && <img src={urlFor(post.author.image).width(80).height(80).url()} alt="" class="w-8 h-8 rounded-full object-cover" loading="lazy" />}
+            <span class="text-gray-800 font-semibold">{post.author.name}</span>
+          </div>
+        )}
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>{estimatedReadMinutes} menit baca</span>
+        </div>
+      </div>
+    </div>
+
+    {mainImageUrl && (
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
+        <div class="rounded-[2rem] overflow-hidden shadow-xl">
+          <img src={mainImageUrl} alt={post.title} class="w-full h-[280px] md:h-[420px] object-cover" loading="eager" />
+        </div>
+      </div>
+    )}
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid lg:grid-cols-3 gap-12">
+      
+      {/* --- KOLOM KIRI: KONTEN ARTIKEL, TAG & SHARE --- */}
+      <div class="lg:col-span-2">
+        <article class="prose-abbs" set:html={bodyHtml} />
+
+        {/* Bagian Tag & Share Buttons */}
+        <div class="mt-12 pt-8 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          
+          {/* Tags */}
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Tag:</span>
+            <div class="flex flex-wrap gap-2">
+              {post.tags && post.tags.length > 0 ? (
+                post.tags.map((tag: string) => (
+                  <span class="px-3 py-1 bg-gray-50 text-gray-600 text-xs font-semibold rounded-md border border-gray-100">
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span class="text-xs text-gray-400 italic">Tidak ada tag</span>
+              )}
+            </div>
+          </div>
+
+          {/* Share Buttons */}
+          <div class="flex items-center gap-3 shrink-0">
+            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Bagikan:</span>
+            <div class="flex gap-2">
+              <a href={`https://wa.me/?text=${encodeURIComponent(post.title + ' - ' + Astro.url.href)}`} target="_blank" rel="noopener" aria-label="Share ke WhatsApp" class="w-9 h-9 rounded-full bg-green-50 text-green-600 flex items-center justify-center hover:bg-green-500 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.6 6.32A8.86 8.86 0 0 0 12.05 4C7.24 4 3.34 7.9 3.34 12.71c0 1.5.4 2.96 1.14 4.25L3.27 21l4.15-1.09a8.68 8.68 0 0 0 4.62 1.32h.01c4.81 0 8.72-3.9 8.72-8.71 0-2.33-.9-4.51-2.55-6.15Z"/></svg>
+              </a>
+              <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noopener" aria-label="Share ke Facebook" class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
+              </a>
+              <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noopener" aria-label="Share ke X (Twitter)" class="w-9 h-9 rounded-full bg-gray-50 text-gray-700 flex items-center justify-center hover:bg-gray-900 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- KOLOM KANAN: SIDEBAR --- */}
+      <aside class="space-y-8">
+        
+        {/* Banner CTA WhatsApp Dinamis */}
+        <div class="bg-blue-50 rounded-3xl p-6 border border-blue-100">
+          <h3 class="font-display text-lg font-semibold text-gray-900 mb-2">Tertarik Bergabung?</h3>
+          <p class="text-sm text-gray-600 mb-4 leading-relaxed">Tanyakan program sekolah langsung ke tim kami.</p>
+          <a href={`https://wa.me/${settings?.whatsappNumber || ''}?text=${encodeURIComponent(waMessage)}`} target="_blank" rel="noopener" class="block text-center bg-abbs-blue hover:bg-abbs-blue-dark text-white px-5 py-3 rounded-full font-bold text-sm transition-all shadow-md">
+            Tanya via WhatsApp
+          </a>
+        </div>
+
+        {/* Artikel Terkait */}
+        {related.length > 0 && (
+          <div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Berita Terkait</h3>
+            <div class="space-y-4">
+              {related.map((r: any) => (
+                <a href={`/berita/${r.slug}`} class="flex gap-3 group">
+                  {r.mainImage && <img src={urlFor(r.mainImage).width(160).height(160).url()} alt="" class="w-20 h-20 rounded-xl object-cover shrink-0" loading="lazy" />}
+                  <div>
+                    <p class="text-sm font-bold text-gray-800 group-hover:text-abbs-blue-dark transition-colors line-clamp-3">{r.title}</p>
+                    <p class="text-xs text-gray-400 mt-1">{formatDate(r.publishedAt)}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Kategori Sidebar */}
+        {categories.length > 0 && (
+          <div>
+            <h3 class="font-display text-lg font-semibold text-gray-900 mb-4">Kategori</h3>
+            <div class="flex flex-wrap gap-2">
+              {categories.map((c: any) => (
+                <a href="/berita" class="px-3 py-1.5 bg-white border border-gray-200 hover:border-abbs-blue hover:text-abbs-blue-dark text-gray-600 text-xs font-semibold rounded-full transition-colors">{c.title}</a>
+              ))}
+            </div>
+          </div>
+        )}
+      </aside>
+    </div>
+
+    {/* Navigasi Artikel Sebelum & Sesudah */}
+    {(post.prev || post.next) && (
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pt-8 border-t border-gray-100">
+        <div class="grid sm:grid-cols-2 gap-4">
+          {post.prev ? (
+            <a href={`/berita/${post.prev.slug}`} class="group flex items-center gap-4 p-5 rounded-2xl bg-white border border-gray-100 hover:border-abbs-blue hover:shadow-lg transition-all">
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-abbs-blue-dark shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+              <div>
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Sebelumnya</p>
+                <p class="text-sm font-bold text-gray-800 group-hover:text-abbs-blue-dark transition-colors line-clamp-1">{post.prev.title}</p>
+              </div>
+            </a>
+          ) : <div />}
+          {post.next && (
+            <a href={`/berita/${post.next.slug}`} class="group flex items-center justify-end gap-4 p-5 rounded-2xl bg-white border border-gray-100 hover:border-abbs-blue hover:shadow-lg transition-all text-right">
+              <div>
+                <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Berikutnya</p>
+                <p class="text-sm font-bold text-gray-800 group-hover:text-abbs-blue-dark transition-colors line-clamp-1">{post.next.title}</p>
+              </div>
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-abbs-blue-dark shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+          )}
+        </div>
+      </div>
+    )}
+  </main>
+</BaseLayout>
+
+========================================
+LOKASI FILE: ./pages/berita/halaman/[page].astro
+========================================
+
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import {urlFor} from '../../../lib/sanity/image'
+import {getAllPostsPaged, getPostCount} from '../../../lib/sanity/queries'
+
+// 1. Tetap di sini untuk digunakan oleh komponen saat rendering
+const PER_PAGE = 9
+
+export async function getStaticPaths() {
+  // 2. TAMBAHKAN DI SINI untuk digunakan saat proses build/prerendering Astro
+  const PER_PAGE = 9
+  
+  const total = await getPostCount()
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+  return Array.from({length: Math.max(0, totalPages - 1)}).map((_, i) => ({
+    params: {page: String(i + 2)},
+  }))
+}
+
+const {page} = Astro.params
+const currentPage = Number(page)
+const total = await getPostCount()
+const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+const start = (currentPage - 1) * PER_PAGE
+const posts = await getAllPostsPaged(start, start + PER_PAGE)
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+}
+---
+<BaseLayout title={`Berita & Agenda — Halaman ${currentPage}`}>
+  <main class="pt-24 lg:pt-32 pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-14">
+      <h1 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-4">Berita & Agenda</h1>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        {posts.map((post: any) => (
+          <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
+            <a href={`/berita/${post.slug}`}>
+              <div class="relative h-52 overflow-hidden">
+                {post.mainImage && <img src={urlFor(post.mainImage).width(600).height(400).url()} alt={post.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />}
+                {post.category && <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">{post.category}</div>}
+              </div>
+              <div class="p-8">
+                <time class="text-sm text-gray-500 font-medium block mb-3" datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                <h2 class="font-display text-2xl font-semibold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors leading-snug">{post.title}</h2>
+                <p class="text-gray-600 text-sm line-clamp-3">{post.excerpt}</p>
+              </div>
+            </a>
+          </article>
+        ))}
+      </div>
+
+      <div class="mt-14 flex items-center justify-center gap-2">
+        {currentPage === 2
+          ? <a href="/berita" class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark font-bold">1</a>
+          : <a href={`/berita/halaman/${currentPage - 1}`} class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark font-bold">{currentPage - 1}</a>}
+        <span class="w-10 h-10 rounded-full bg-abbs-blue text-white flex items-center justify-center font-bold">{currentPage}</span>
+        {currentPage < totalPages && (
+          <a href={`/berita/halaman/${currentPage + 1}`} class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-abbs-blue hover:text-abbs-blue-dark font-bold">{currentPage + 1}</a>
+        )}
+      </div>
+    </div>
+  </main>
+</BaseLayout>
+
+========================================
+LOKASI FILE: ./pages/guru-karyawan.astro
+========================================
+
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {urlFor} from '../lib/sanity/image'
+import {getGuruKaryawanPage, getStaffMembers} from '../lib/sanity/queries'
+
+const pageData = await getGuruKaryawanPage()
+const staff = await getStaffMembers()
+
+// 1. Pimpinan
+const pimpinan = staff.filter((s: any) => s.group === 'pimpinan')
+
+// 2. Guru Mapel (Menggabungkan semua kategori guru)
+const guruMapel = staff.filter((s: any) => ['cambridge', 'ict', 'tahfidz', 'guru'].includes(s.group))
+
+// 3. Tenaga Kependidikan
+const kependidikan = staff.filter((s: any) => s.group === 'kependidikan')
+
+// Menyusun seksi yang akan di-render
+const sections = [
+  {title: 'Guru Mata Pelajaran', items: guruMapel, accent: 'bg-blue-50 text-abbs-blue-dark', borderHover: 'group-hover:border-blue-200'},
+  {title: 'Tenaga Kependidikan', items: kependidikan, accent: 'bg-gray-100 text-gray-600', borderHover: 'group-hover:border-gray-300'},
+]
+---
+<BaseLayout title={pageData?.title || 'Guru & Karyawan'} description={pageData?.description}>
+  <main class="pt-24 lg:pt-32 pb-20 bg-gray-50/50">
+    
+    <!-- Header Halaman -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-16">
+      {pageData?.eyebrow && (
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-abbs-blue-dark font-bold mb-6 uppercase tracking-wider text-xs shadow-sm border border-blue-100">
+          {pageData.eyebrow}
+        </div>
+      )}
+      <h1 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight mb-6">{pageData?.title}</h1>
+      {pageData?.description && <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">{pageData.description}</p>}
+    </div>
+
+    <!-- Seksi 1: Pimpinan (Highlight Horizontal Card) -->
+    {pimpinan.length > 0 && (
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+        {pimpinan.map((p: any) => (
+          <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 p-6 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-12 mb-8 last:mb-0 hover:shadow-2xl transition-shadow duration-300">
+            
+            {/* Foto Pimpinan dengan frame dekoratif */}
+            <div class="shrink-0 relative group">
+              <div class="absolute inset-0 bg-blue-100 rounded-[2rem] transform rotate-3 scale-105 -z-10 transition-transform group-hover:rotate-6"></div>
+              <div class="w-48 h-48 md:w-56 md:h-56 rounded-[2rem] overflow-hidden border-4 border-white shadow-md bg-gray-100">
+                {p.photo ? (
+                  <img 
+                    src={urlFor(p.photo).width(500).height(500).fit('crop').auto('format').url()} 
+                    alt={p.name} 
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center text-gray-300">
+                    <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Konten Teks Pimpinan */}
+            <div class="flex flex-col flex-grow text-center md:text-left">
+              <span class="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-abbs-blue-dark text-xs font-bold uppercase tracking-wider mb-4 w-fit mx-auto md:mx-0 border border-blue-100">
+                {p.position}
+              </span>
+              <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-4">{p.name}</h2>
+              {p.bio && <p class="text-gray-600 leading-relaxed mb-6 text-lg">{p.bio}</p>}
+              
+              {p.email && (
+                <a href={`mailto:${p.email}`} class="text-sm text-gray-600 font-medium hover:text-abbs-blue-dark transition-colors flex items-center gap-2 w-fit mx-auto md:mx-0 px-5 py-2.5 rounded-xl bg-gray-50 border border-gray-200 hover:border-abbs-blue-dark">
+                  <svg class="w-5 h-5 text-abbs-blue-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  {p.email}
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- Seksi 2 & 3: Guru Mapel & Tenaga Kependidikan (ID Card Grid) -->
+    {sections.filter((s) => s.items.length > 0).map((section) => (
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+        <div class="flex flex-col items-center text-center mb-10">
+          <div class={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${section.accent}`}>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <h2 class="font-display text-2xl md:text-3xl font-semibold text-gray-900">{section.title}</h2>
+          <div class="w-12 h-1 bg-gray-200 rounded-full mt-4"></div>
+        </div>
+        
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+          {section.items.map((member: any) => (
+            <div class="bg-white rounded-3xl p-6 lg:p-8 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center flex flex-col h-full group">
+              
+              {/* Foto Bulat (Circle Avatar) */}
+              <div class={`w-28 h-28 mx-auto mb-5 rounded-full overflow-hidden border-4 border-gray-50 shadow-sm bg-gray-100 transition-colors duration-300 ${section.borderHover}`}>
+                {member.photo ? (
+                  <img 
+                    src={urlFor(member.photo).width(300).height(300).fit('crop').auto('format').url()} 
+                    alt={member.name} 
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  />
+                ) : (
+                  <div class="w-full h-full flex items-center justify-center text-gray-300">
+                    <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  </div>
+                )}
+              </div>
+              
+              {/* Teks ID Card */}
+              <div class="flex flex-col flex-grow">
+                <h3 class="font-bold text-gray-900 text-lg mb-1 leading-tight">{member.name}</h3>
+                <p class="text-sm text-abbs-blue-dark font-bold mb-3 uppercase tracking-wide">{member.position}</p>
+                {member.bio && <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 mt-auto">{member.bio}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+
+    <!-- CTA Section -->
+    {pageData?.ctaTitle && (
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <div class="bg-gray-900 rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-abbs-blue rounded-full blur-[80px] opacity-20 -mr-20 -mt-20 pointer-events-none"></div>
+          <div class="absolute bottom-0 left-0 w-64 h-64 bg-abbs-maroon rounded-full blur-[80px] opacity-20 -ml-20 -mb-20 pointer-events-none"></div>
+          
+          <div class="relative z-10">
+            <h2 class="font-display text-3xl md:text-4xl font-semibold text-white mb-4">{pageData.ctaTitle}</h2>
+            {pageData.ctaDescription && <p class="text-gray-300 text-lg max-w-2xl mx-auto mb-8 leading-relaxed">{pageData.ctaDescription}</p>}
+            {pageData.ctaButtonUrl && (
+              <a href={pageData.ctaButtonUrl} target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg hover:-translate-y-1">
+                {pageData.ctaButtonLabel}
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+  </main>
+</BaseLayout>
