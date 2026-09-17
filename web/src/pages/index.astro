@@ -1,388 +1,1118 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import {urlFor} from '../lib/sanity/image'
-import {getHomePage, getLatestPosts, getSiteSettings} from '../lib/sanity/queries'
+import MainLayout from '../layouts/MainLayout.astro';
+import { sanityClient } from "sanity:client";
+import { createImageUrlBuilder } from "@sanity/image-url";
 
-const home = await getHomePage()
-const settings = await getSiteSettings()
-const latestPosts = await getLatestPosts(3)
+const data: any = await sanityClient.fetch(`{
+  "home": *[_type == "homePage" && _id == "homePage"][0],
+  "settings": *[_type == "siteSettings" && _id == "siteSettings"][0],
+  "posts": *[_type == "post"] | order(publishedAt desc)[0..2] {
+    title, slug, publishedAt, category, mainImage
+  }
+}`);
 
-const colorMap: Record<string, {bg: string; bgHover: string; text: string}> = {
-  blue: {bg: 'bg-blue-50', bgHover: 'group-hover:bg-abbs-blue', text: 'text-abbs-blue-dark'},
-  maroon: {bg: 'bg-red-50', bgHover: 'group-hover:bg-abbs-maroon', text: 'text-abbs-maroon'},
-  emerald: {bg: 'bg-emerald-50', bgHover: 'group-hover:bg-emerald-500', text: 'text-emerald-600'},
+const { home, settings, posts } = data;
+const builder = createImageUrlBuilder(sanityClient);
+
+function urlFor(source: any) {
+  return builder.image(source).auto('format');
 }
 
-const iconMap: Record<string, string> = {
-  'academic-cap': '<path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5" />',
-  'bolt': '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />',
-  'book-open': '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />',
-  'star': '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />',
-  'globe': '<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />'
+function formatDate(dateString: string) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('id-ID', { month: 'short' }).toUpperCase().replace('.', '');
+    return `${day} ${month}`;
 }
 
-const heroImageUrl = home?.heroImage ? urlFor(home.heroImage).width(900).url() : null
-const aboutImg1 = home?.aboutImagePrimary ? urlFor(home.aboutImagePrimary).width(800).url() : null
-const aboutImg2 = home?.aboutImageSecondary ? urlFor(home.aboutImageSecondary).width(600).url() : null
+let safeAchievements: any[] = home?.achievements || [];
+if (safeAchievements.length > 0) {
+    while (safeAchievements.length < 8) {
+        safeAchievements = [...safeAchievements, ...home.achievements];
+    }
+}
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})
+let safeLogos: any[] = home?.alumniLogos || [];
+if (safeLogos.length > 0) {
+    while (safeLogos.length < 12) {
+        safeLogos = [...safeLogos, ...home.alumniLogos];
+    }
 }
 ---
-<BaseLayout title="Beranda" description={home?.heroDescription}>
-  <!-- Hero -->
-  <main id="konten-utama" class="pt-24 lg:pt-32 pb-24 lg:pb-32 overflow-hidden relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div class="relative z-10 hero-in" style="animation-delay:0ms">
-          {(settings?.ppsActive && settings?.ppsBadgeText) && (
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-abbs-blue-dark font-semibold text-sm mb-6 border border-blue-100 shadow-sm">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path></svg>
-              {settings.ppsBadgeText}
-            </div>
-          )}
 
-          <h1 class="font-display text-4xl md:text-5xl lg:text-[3.4rem] font-semibold text-gray-900 leading-[1.08] mb-6 tracking-tight">
-            {home?.heroHeadline} <span class="text-abbs-blue-dark">{home?.heroHighlight}</span>
-          </h1>
-          <p class="text-lg text-gray-600 mb-9 leading-relaxed max-w-xl">{home?.heroDescription}</p>
-          <div class="flex flex-wrap items-center gap-4">
-            {home?.heroPrimaryCtaUrl && (
-              <a href={home.heroPrimaryCtaUrl} target="_blank" rel="noopener"
-                 class="bg-abbs-blue hover:bg-abbs-blue-dark text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg shadow-abbs-blue/25 hover:shadow-xl hover:-translate-y-0.5 w-full sm:w-auto text-center">
-                {home.heroPrimaryCtaLabel}
-              </a>
-            )}
-            {home?.heroSecondaryCtaUrl && (
-              <a href={home.heroSecondaryCtaUrl}
-                 class="flex items-center justify-center gap-2 border-2 border-gray-200 hover:border-abbs-blue text-gray-700 hover:text-abbs-blue-dark px-6 py-3 rounded-full font-bold transition-all w-full sm:w-auto">
-                {home.heroSecondaryCtaLabel}
-              </a>
-            )}
-          </div>
-          {home?.heroNote && <p class="text-sm text-gray-500 mt-5 text-center sm:text-left">{home.heroNote}</p>}
-        </div>
+<MainLayout
+    title="Beranda - SMA ABBS Yogyakarta"
+    description={settings?.seoDescription}
+    image={home?.heroImage ? urlFor(home.heroImage).width(1200).height(630).url() : undefined}>
 
-        <div class="relative z-10 mt-8 lg:mt-0 w-full hero-in" style="animation-delay:120ms">
-          <div class="relative h-[320px] sm:h-[400px] lg:h-[560px] rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-2xl border-4 lg:border-8 border-white">
-            {heroImageUrl && <img src={heroImageUrl} alt="Kegiatan siswa" class="w-full h-full object-cover" loading="eager" />}
-            <div class="absolute inset-0 bg-gradient-to-t from-abbs-blue-dark/35 to-transparent mix-blend-multiply"></div>
-          </div>
-        </div>
-      </div>
+<div id="pageLoader" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05070c] overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
+             style="background: radial-gradient(circle, rgba(46,109,164,0.18) 0%, transparent 70%);"></div>
+        <div class="absolute top-1/4 right-1/4 w-64 h-64 rounded-full blur-[80px]"
+             style="background: rgba(128,0,0,0.04);"></div>
     </div>
-    <!-- Satu aksen dekoratif saja, tidak diulang di tiap section -->
-    <div class="absolute top-0 right-0 -mr-20 lg:-mr-40 -mt-20 lg:-mt-40 w-[300px] lg:w-[560px] h-[300px] lg:h-[560px] rounded-full bg-abbs-blue blur-[90px] lg:blur-[120px] opacity-[0.16] pointer-events-none"></div>
-  </main>
+    <div class="absolute inset-0 opacity-[0.025]"
+         style="background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 60px 60px;"></div>
 
-  <!-- Program Unggulan -->
-  <section id="program" class="relative z-20 -mt-4 lg:-mt-12 pb-20 scroll-mt-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="absolute top-8 left-8 w-10 h-10 loader-bracket-tl" style="border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.15);"></div>
+    <div class="absolute top-8 right-8 w-10 h-10" style="border-top: 1px solid rgba(255,255,255,0.15); border-right: 1px solid rgba(255,255,255,0.15);"></div>
+    <div class="absolute bottom-8 left-8 w-10 h-10" style="border-bottom: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.15);"></div>
+    <div class="absolute bottom-8 right-8 w-10 h-10" style="border-bottom: 1px solid rgba(255,255,255,0.15); border-right: 1px solid rgba(255,255,255,0.15);"></div>
 
-      {(home?.programSectionTitle || home?.programEyebrow) && (
-        <div class="text-center mb-12 lg:mb-16">
-          {home?.programEyebrow && (
-            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              {home.programEyebrow}
-            </div>
-          )}
-          {home?.programSectionTitle && <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.programSectionTitle}</h2>}
-          {home?.programDescription && <p class="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">{home.programDescription}</p>}
+    <div class="absolute top-9 left-1/2 -translate-x-1/2 text-[9px] tracking-[0.5em] text-white/15 font-mono uppercase">
+        SMA · ABBS · SURAKARTA
+    </div>
+
+    <div class="loader-center relative flex flex-col items-center">
+        <div class="loader-logo mb-8 relative">
+            <div class="absolute inset-0 -m-5 rounded-full loader-ring"
+                 style="border: 1px solid rgba(46,109,164,0.4); border-top-color: rgba(128,0,0,0.6);"></div>
+            <img 
+                src={settings?.logo ? urlFor(settings.logo).height(120).url() : "/logo-abbs-jogja-putih.png"}
+                onerror="this.src='https://placehold.co/120x120?text=ABBS'"
+                alt="Logo SMA ABBS"
+                class="h-20 w-auto object-contain drop-shadow-2xl relative z-10">
         </div>
-      )}
 
-      <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
-        {(home?.programs || []).map((program: any) => {
-          const c = colorMap[program.color] || colorMap.blue
-          const svgPath = iconMap[program.icon] || iconMap['book-open']
+        <div class="loader-name text-center mb-10">
+            <p class="text-white text-xl font-light tracking-[0.4em] uppercase mb-1">SMA ABBS</p>
+            <div class="flex items-center justify-center gap-3">
+                <div class="w-8 h-px bg-yellow-500/40"></div>
+                <p class="text-white/40 text-[10px] tracking-[0.55em] uppercase font-light">Yogyakarta</p>
+                <div class="w-8 h-px bg-yellow-500/40"></div>
+            </div>
+        </div>
 
-          return (
-            <div class="bg-white p-8 rounded-3xl shadow-xl hover:shadow-2xl border border-gray-100 hover:-translate-y-2 transition-all duration-300 group">
-              <div class={`w-16 h-16 ${c.bg} ${c.bgHover} rounded-2xl flex items-center justify-center mb-6 ${c.text} group-hover:text-white transition-colors duration-300`}>
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <Fragment set:html={svgPath} />
-                </svg>
-              </div>
-              <h3 class="font-display text-2xl font-semibold text-gray-900 mb-3">{program.title}</h3>
-              <p class="text-gray-600 leading-relaxed mb-4">{program.description}</p>
-              {program.ctaUrl && (
-                <a href={program.ctaUrl} target="_blank" rel="noopener" class={`${c.text} font-semibold hover:text-abbs-maroon flex items-center gap-1 transition-colors`}>
-                  {program.ctaText}
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        <div class="loader-bar-wrap w-48 h-px bg-white/10 relative overflow-hidden">
+            <div id="loaderBar" class="absolute left-0 top-0 h-full bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 w-0"></div>
+        </div>
+        <p id="loaderPct" class="text-[9px] tracking-[0.4em] text-white/25 font-mono mt-3 uppercase">Loading...</p>
+    </div>
+
+    <div class="absolute bottom-9 text-[9px] tracking-[0.4em] text-white/15 uppercase">
+        Excellence · Character · Innovation
+    </div>
+</div>
+
+<section class="hero-section relative w-full h-screen overflow-hidden bg-black">
+    <img 
+        src={home?.heroImage ? urlFor(home.heroImage).url() : "https://images.unsplash.com/photo-1564981797816-1043664bf78d?q=80&w=2574&auto=format&fit=crop"} 
+        alt="Hero Background" 
+        class="hero-img absolute inset-0 w-full h-full object-cover z-0 scale-[1.04]"
+        style="transition: transform 8s ease-out; transform-origin: center center;">
+
+    <div class="absolute inset-0 z-10" style="background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.05) 60%, rgba(0,0,0,0.75) 100%);"></div>
+    <div class="absolute inset-0 z-10" style="background: radial-gradient(ellipse at 30% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);"></div>
+
+    {/* =========================================================
+        LOGO DAN TEKS HERO (Digabung dalam 1 Flex Container)
+    ========================================================= */}
+    <div class="absolute inset-0 flex flex-col justify-center items-center z-20 px-6 pt-16 md:pt-20 pb-24 md:pb-0">
+        
+        {/* Logo Block */}
+        <div class="text-center hero-logo mb-6 md:mb-10">
+            <img 
+                src={settings?.logo ? urlFor(settings.logo).height(100).url() : "/logo-abbs-jogja-putih.png"} 
+                onerror="this.src='https://placehold.co/100x100?text=Logo'" 
+                alt="Logo" 
+                class="h-12 md:h-14 mx-auto drop-shadow-2xl mb-3 object-contain">
+            <div class="flex items-center justify-center gap-3">
+                <div class="w-8 h-px bg-white/40"></div>
+                <p class="text-[10px] tracking-[0.35em] font-light uppercase text-white/70">
+                    {home?.heroTopLabel || 'SMA ABBS Yogyakarta'}
+                </p>
+                <div class="w-8 h-px bg-white/40"></div>
+            </div>
+        </div>
+
+        {/* Teks Overline Dinamis (Ditambah 'text-center' dan tracking disesuaikan) */}
+        <p class="hero-overline text-center text-[9px] md:text-xs tracking-[0.3em] md:tracking-[0.5em] font-semibold uppercase text-yellow-400/80 mb-4 md:mb-5 opacity-0 px-4">
+            {home?.heroOverline || 'Est. — Excellence in Education'}
+        </p>
+        
+        {/* Judul Besar */}
+        <h1 class="hero-title text-center leading-[0.9] opacity-0 flex flex-col items-center">
+            <span class="block text-[14vw] md:text-[9vw] lg:text-[8vw] font-extralight text-white tracking-[-0.02em] uppercase">
+                {home?.heroTitleTop || home?.heroTitle || 'Wujudkan'}
+            </span>
+            <span class="block text-[14vw] md:text-[9vw] lg:text-[8vw] font-black text-transparent hero-outline-text tracking-[-0.02em] uppercase mt-1 md:mt-0">
+                {home?.heroTitleBottom || 'Potensi'}
+            </span>
+        </h1>
+        
+        {/* Tombol Play */}
+        {home?.heroVideoLink && (
+            <button 
+                class="hero-play mt-8 md:mt-10 opacity-0 group flex items-center gap-4 cursor-pointer open-video"
+                data-video={home.heroVideoLink}>
+                <div class="w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/50 flex items-center justify-center text-white backdrop-blur-sm bg-white/5 group-hover:bg-white/15 group-hover:border-white transition-all duration-400">
+                    <i class="fa-solid fa-play ml-1 text-sm md:text-base"></i>
+                </div>
+                <span class="text-white/60 text-[10px] md:text-xs uppercase tracking-[0.3em] font-medium group-hover:text-white/90 transition-colors duration-300">
+                    {home?.heroVideoText || 'Tonton Video'}
+                </span>
+            </button>
+        )}
+    </div>
+
+    <div id="ppdbFloatBox" class="absolute bottom-0 right-0 z-30 w-full md:w-[420px] transition-all duration-500 ease-in-out origin-bottom-right">
+        <div class="ppdb-glass p-8 md:p-10 text-white relative">
+            <button id="closePpdbBtn" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-2 mb-4 pr-6">
+                <div class="w-1 h-8 bg-yellow-500"></div>
+                <div>
+                    <p class="text-[9px] font-bold text-yellow-400/80 tracking-[0.3em] uppercase">
+                        {home?.ppdbLabel || 'Penerimaan Siswa Baru'}
+                    </p>
+                    <h3 class="text-lg md:text-xl font-bold uppercase leading-tight mt-0.5">
+                        {home?.ppdbTitle || 'PPDB Tahun Ajaran Baru'}
+                    </h3>
+                </div>
+            </div>
+            <p class="text-sm text-white/65 leading-relaxed mb-6 font-light pl-3">
+                {home?.ppdbText || 'Bergabunglah dalam lingkungan pendidikan yang mengintegrasikan sains dan karakter.'}
+            </p>
+            {home?.ppdbLink && (
+                <a href={home.ppdbLink} class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-400 hover:text-yellow-300 transition-colors duration-200 group">
+                    {home?.ppdbButtonText || 'Selengkapnya'} 
+                    <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform duration-200"></i>
                 </a>
-              )}
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  </section>
-
-  <!-- Tentang Kami -->
-  <section id="tentang-kami" class="py-16 lg:py-24 bg-gray-50 overflow-hidden scroll-mt-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
-        <div class="relative">
-          <div class="absolute -top-6 -left-6 w-32 h-32 bg-blue-50 rounded-3xl -z-10"></div>
-          {aboutImg1 && (
-            <div class="w-4/5 rounded-3xl overflow-hidden shadow-xl border-4 border-white z-10 relative">
-              <img src={aboutImg1} alt="Kegiatan sekolah" class="w-full h-auto object-cover aspect-[4/3]" loading="lazy" />
-            </div>
-          )}
-          {aboutImg2 && (
-            <div class="absolute -bottom-10 right-0 w-1/2 rounded-3xl overflow-hidden shadow-2xl border-8 border-white z-20 hover:scale-105 transition-transform duration-500">
-              <img src={aboutImg2} alt="Kegiatan siswa" class="w-full h-auto object-cover aspect-square" loading="lazy" />
-            </div>
-          )}
-          {home?.aboutBadgeText && (
-            <div class="absolute top-1/4 -right-8 bg-white p-4 rounded-2xl shadow-lg border border-gray-100 flex items-center gap-3 z-30 animate-bounce-slow">
-              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xl">A</div>
-              <div>
-                <p class="text-sm font-bold text-gray-800">{home.aboutBadgeText}</p>
-                <p class="text-xs text-gray-500">{home.aboutBadgeSubtext}</p>
-              </div>
-            </div>
-          )}
-        </div>
-        <div class="mt-12 lg:mt-0 lg:pl-8">
-          {home?.aboutEyebrow && (
-            <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-              {home.aboutEyebrow}
-            </div>
-          )}
-          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-6 leading-tight">{home?.aboutTitle}</h2>
-          <p class="text-gray-600 leading-relaxed mb-8 text-lg">{home?.aboutDescription}</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
-            {(home?.aboutFeatures || []).map((f: any) => (
-              <div class="flex items-start gap-4">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-abbs-blue-dark flex items-center justify-center shrink-0">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div>
-                  <h4 class="font-bold text-gray-900 text-lg">{f.title}</h4>
-                  <p class="text-sm text-gray-500">{f.subtitle}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Statistik -->
-  {home?.stats?.length > 0 && (
-    <section class="py-14 bg-white border-y border-gray-100">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100 text-center">
-        {home.stats.map((s: any) => (
-          <div class="px-2">
-            <p class="font-display text-4xl md:text-5xl font-bold text-abbs-blue-dark mb-2">{s.value}</p>
-            <p class="text-gray-500 font-medium text-sm md:text-base">{s.label}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  )}
-
-  <!-- Testimoni -->
-  {home?.testimonials?.length > 0 && (
-    <section class="py-16 lg:py-28 bg-gray-50 relative overflow-hidden">
-
-      <div class="absolute -top-24 -right-24 w-96 h-96 bg-abbs-blue rounded-full blur-[120px] opacity-[0.14] pointer-events-none"></div>
-
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-        <div class="text-center mb-14 lg:mb-20">
-          {home?.testimonialEyebrow && (
-            <div class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white text-abbs-blue-dark font-bold mb-5 uppercase tracking-wider text-xs shadow-sm border border-gray-100">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-              {home.testimonialEyebrow}
-            </div>
-          )}
-          <h2 class="font-display text-4xl md:text-5xl font-semibold text-gray-900 leading-tight">{home.testimonialSectionTitle}</h2>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-8">
-          {home.testimonials.map((t: any) => (
-            <div class="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-xl border border-gray-100 hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full group">
-
-              <div class="absolute top-8 right-8 text-gray-50 group-hover:text-blue-50 transition-colors duration-500 pointer-events-none">
-                <svg class="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </div>
-
-              <p class="text-gray-600 leading-relaxed mb-10 italic relative z-10 text-lg flex-grow">"{t.quote}"</p>
-
-              <div class="flex items-center gap-4 relative z-10 mt-auto pt-6 border-t border-gray-50">
-                {t.photo ? (
-                  <img
-                    src={urlFor(t.photo).width(120).height(120).fit('crop').auto('format').url()}
-                    alt={t.name}
-                    class="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm ring-2 ring-gray-100"
-                  />
-                ) : (
-                  <div class="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-abbs-blue to-abbs-blue-dark flex items-center justify-center text-white font-display font-bold text-xl shadow-md border-2 border-white ring-2 ring-gray-100">
-                    {t.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <p class="font-bold text-gray-900 text-lg mb-0.5">{t.name}</p>
-                  <p class="text-sm text-abbs-blue-dark font-medium">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Galeri & Lightbox (Support Foto & Video) -->
-  {(home?.galleryItems?.length > 0 || home?.galleryImages?.length > 0) && (
-    <section class="py-16 lg:py-24 bg-white overflow-hidden relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-        <div class="text-center mb-12">
-          {home?.galleryEyebrow && (
-            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              {home.galleryEyebrow}
-            </div>
-          )}
-          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 mb-4 leading-tight">{home.gallerySectionTitle}</h2>
-          {home?.galleryDescription && <p class="text-gray-600 max-w-2xl mx-auto text-lg">{home.galleryDescription}</p>}
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {(home.galleryItems || []).map((item: any) => {
-            const isVideo = item.mediaType === 'video' && item.videoUrl;
-            const linkHref = isVideo ? item.videoUrl : (item.image ? urlFor(item.image).width(1200).auto('format').url() : '#');
-            const gridImgUrl = item.image ? urlFor(item.image).width(600).height(600).fit('crop').auto('format').url() : null;
-            const dataTitle = item.title ? `title: ${item.title}` : '';
-            const dataGlightbox = `type: ${isVideo ? 'video' : 'image'}; ${dataTitle}`;
-
-            return (
-              <a href={linkHref} class="glightbox relative rounded-2xl overflow-hidden aspect-square shadow-md group" data-glightbox={dataGlightbox}>
-                {gridImgUrl && (
-                  <img
-                    src={gridImgUrl}
-                    alt={item.title || 'Galeri SMA ABBS'}
-                    class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                )}
-                {isVideo && (
-                  <div class="absolute inset-0 bg-gray-900/30 flex items-center justify-center transition-colors duration-500 group-hover:bg-gray-900/50">
-                    <div class="w-14 h-14 bg-abbs-maroon text-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <svg class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
-                    </div>
-                  </div>
-                )}
-                {item.title && (
-                  <div class="absolute bottom-3 left-3 right-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-gray-800 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 truncate text-center">
-                    {item.title}
-                  </div>
-                )}
-              </a>
-            )
-          })}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- Berita Terkini -->
-  {latestPosts?.length > 0 && (
-    <section id="berita" class="py-16 lg:py-24 bg-gray-50 relative scroll-mt-24">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            {home?.beritaEyebrow && (
-              <div class="inline-flex items-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
-                {home.beritaEyebrow}
-              </div>
             )}
-            <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
-              {home?.beritaTitle || 'Berita & Agenda'}
-            </h2>
-          </div>
-          <a href="/berita" class="hidden md:inline-flex bg-blue-50 text-abbs-blue-dark px-5 py-2.5 rounded-full font-bold text-sm hover:bg-abbs-blue hover:text-white transition-all">Lihat Semua Berita</a>
         </div>
+    </div>
+</section>
 
-        <div class="grid md:grid-cols-3 gap-8">
-          {latestPosts.map((post: any) => (
-            <article class="bg-white border border-gray-100 rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1">
-              <a href={`/berita/${post.slug}`}>
-                <div class="relative h-52 overflow-hidden">
-                  {post.mainImage && <img src={urlFor(post.mainImage).width(600).height(400).url()} alt={post.title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />}
-                  {post.category && <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-gray-800 shadow-sm">{post.category}</div>}
+<section class="relative bg-[#fafaf9] py-28 md:py-36 overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.015] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E'); background-size: 200px;"></div>
+    
+    <div class="container mx-auto px-6 md:px-16 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-16 lg:gap-24 items-center">
+            <div class="order-2 lg:order-1">
+                <div class="flex items-center gap-4 mb-10 reveal reveal-left">
+                    <div class="w-10 h-px bg-[#2E6DA4]"></div>
+                    {/* Teks Dinamis Principal Overline */}
+                    <span class="text-[10px] font-bold text-[#2E6DA4] tracking-[0.4em] uppercase">
+                        {home?.principalOverline || "Principal's Message"}
+                    </span>
                 </div>
-                <div class="p-8">
-                  <div class="flex items-center gap-2 text-sm text-gray-500 mb-3 font-medium">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
-                  </div>
-                  <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-abbs-blue-dark transition-colors line-clamp-2">{post.title}</h3>
-                  <p class="text-gray-600 text-sm line-clamp-3 mb-6 leading-relaxed">{post.excerpt}</p>
-                  <span class="text-abbs-maroon font-semibold text-sm flex items-center gap-1">Baca Selengkapnya
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                  </span>
-                </div>
-              </a>
-            </article>
-          ))}
-        </div>
-        <div class="mt-10 text-center md:hidden">
-          <a href="/berita" class="inline-flex bg-blue-50 text-abbs-blue-dark px-6 py-3 rounded-full font-bold transition-all w-full justify-center">Lihat Semua Berita</a>
-        </div>
-      </div>
-    </section>
-  )}
+                
+                <h2 class="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 leading-[1.1] mb-8 reveal reveal-up">
+                    {home?.principalTaglineTop || 'Mendidik dengan'} <br>
+                    <em class="not-italic font-black relative inline-block text-[#2E6DA4]">
+                        {home?.principalTaglineBottom || 'Hati & Teknologi'}
+                        <svg class="absolute -bottom-1 left-0 w-full" height="6" viewBox="0 0 300 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 4 Q75 0 150 4 Q225 8 300 4" stroke="#60A0D0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                        </svg>
+                    </em>
+                </h2>
 
-  <!-- FAQ -->
-  {home?.faqs?.length > 0 && (
-    <section id="faq" class="py-16 lg:py-24 bg-white scroll-mt-24">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          {home?.faqEyebrow && (
-            <div class="inline-flex items-center justify-center gap-2 text-abbs-blue-dark font-semibold mb-3 uppercase tracking-wider text-sm">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              {home.faqEyebrow}
+                <div class="relative pl-6 border-l-2 border-gray-200 mb-10 reveal reveal-up" style="--reveal-delay: 100ms">
+                    <i class="fa-solid fa-quote-left text-2xl text-[#2E6DA4]/20 absolute -left-1 -top-1"></i>
+                    <p class="text-gray-600 leading-relaxed text-base md:text-lg font-light italic">
+                        {home?.principalMessage || "Pesan kepala sekolah belum diisi."}
+                    </p>
+                </div>
+                <div class="flex items-center gap-6 pt-6 border-t border-gray-100 reveal reveal-up" style="--reveal-delay: 200ms">
+                    <div class="w-10 h-10 rounded-full bg-[#2E6DA4]/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-user text-[#2E6DA4] text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-900 text-base">{home?.principalName || 'Nama Kepala Sekolah'}</p>
+                        {/* Teks Dinamis Jabatan */}
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mt-0.5">
+                            {home?.principalRole || 'Kepala Sekolah SMA ABBS'}
+                        </p>
+                    </div>
+                </div>
             </div>
-          )}
-          <h2 class="font-display text-3xl md:text-4xl font-semibold text-gray-900">{home.faqSectionTitle}</h2>
+
+            <div class="order-1 lg:order-2 relative reveal reveal-right">
+                <div class="absolute -top-4 -right-4 w-full h-full border border-gray-200 z-0 hidden md:block"></div>
+                <div class="absolute -bottom-4 -left-4 w-32 h-32 bg-yellow-400/10 z-0 hidden md:block"></div>
+                
+                <div class="relative overflow-hidden shadow-2xl z-10 bg-gray-100" style="aspect-ratio: 4/5;">
+                    <img 
+                        src={home?.principalPhoto ? urlFor(home.principalPhoto).url() : "https://images.unsplash.com/photo-1544717305-2782549b5136"} 
+                        alt="Kepala Sekolah" 
+                        class="w-full h-full object-cover transition-transform duration-1000 hover:scale-105">
+                    <div class="absolute bottom-0 left-0 right-0 h-32" style="background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);"></div>
+                    <div class="absolute bottom-6 right-6 bg-[#2E6DA4] text-white px-5 py-3 text-center">
+                        <span class="block text-3xl font-black leading-none">{home?.schoolAge || '15+'}</span>
+                        <span class="text-[9px] uppercase tracking-[0.25em] opacity-70 block mt-1">Tahun Berdiri</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="space-y-4">
-          {home.faqs.map((faq: any) => (
-            <details class="group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
-              <summary class="flex items-center justify-between gap-4 p-6 cursor-pointer font-bold text-gray-900 list-none [&::-webkit-details-marker]:hidden">
-                {faq.question}
-                <svg class="w-5 h-5 shrink-0 transition-transform group-open:rotate-180 text-abbs-blue-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-              </summary>
-              <div class="px-6 pb-6 text-gray-600 leading-relaxed">{faq.answer}</div>
-            </details>
-          ))}
+    </div>
+</section>
+
+<section class="relative overflow-hidden bg-white">
+    <div class="h-px w-full bg-gray-100"></div>
+    <div class="container mx-auto px-6 md:px-16 pt-20 pb-10 relative z-10">
+        <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-14">
+            <div class="reveal reveal-left">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-6 h-px bg-[#2E6DA4]"></div>
+                    {/* Teks Dinamis Label Kurikulum */}
+                    <span class="text-[10px] font-bold text-[#2E6DA4] tracking-[0.4em] uppercase">
+                        {home?.curriculumOverline || 'Core Curriculum'}
+                    </span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-light text-gray-900 leading-tight">
+                    {home?.curriculumHeader || 'Three Pillars of'} 
+                    {/* Teks Dinamis Highlight Kurikulum */}
+                    <span class="font-black text-[#2E6DA4]">{home?.curriculumHeaderHighlight || 'Excellence'}</span>
+                </h2>
+            </div>
+            <p class="text-gray-400 text-sm max-w-xs leading-relaxed text-right hidden md:block reveal reveal-right">
+                {home?.curriculumSubHeader || 'Tiga fondasi pendidikan yang membentuk generasi unggul, berakhlak, dan berdaya saing global.'}
+            </p>
         </div>
-      </div>
-    </section>
-  )}
-</BaseLayout>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 h-auto md:h-[80vh] min-h-[600px]">
+        {home?.curriculum?.map((item: any, index: number) => (
+            <div class={`group relative overflow-hidden flex flex-col justify-end border-r border-white/5 reveal reveal-up`} style={`--reveal-delay: ${index * 120}ms`}>
+                <img 
+                    src={item.image ? urlFor(item.image).url() : "https://placehold.co/600x800"} 
+                    class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-110"
+                    alt={item.title}>
+                
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90"></div>
+                <div class={`absolute inset-0 ${item.color || 'bg-[#2E6DA4]/80'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply`}></div>
+                
+                <div class="relative z-10 p-8 md:p-12 transform transition-transform duration-500 group-hover:-translate-y-4">
+                    <span class="absolute top-0 right-8 -mt-20 text-8xl font-black text-white/10 leading-none select-none group-hover:text-white/20 transition-colors duration-700">
+                        0{index + 1}
+                    </span>
+                    <div class="w-12 h-[2px] bg-yellow-400 mb-6 group-hover:w-20 transition-all duration-500 ease-out"></div>
+                    <h3 class="text-3xl md:text-4xl font-bold text-white uppercase tracking-wider leading-tight mb-4">
+                        {item.title}
+                    </h3>
+                    
+                    <p class="text-gray-300 text-sm md:text-base leading-relaxed mb-8 font-light line-clamp-3">
+                        {item.desc}
+                    </p>
+
+                    {item.link ? (
+                        <a href={item.link} class="inline-flex items-center gap-3 text-xs font-bold text-white uppercase tracking-[0.2em] border-b border-white/30 pb-1 hover:text-yellow-400 hover:border-yellow-400 transition-colors">
+                            Selengkapnya <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    ) : (
+                        <span class="inline-flex items-center gap-3 text-xs font-bold text-white/50 uppercase tracking-[0.2em]">
+                            Explore Pillar
+                        </span>
+                    )}
+                </div>
+            </div>
+        ))}
+    </div>
+</section>
+
+{home?.campusImages && home.campusImages.length > 0 && (
+<section class="relative bg-white py-24 overflow-hidden border-t border-gray-100">
+    <div class="container mx-auto px-6 md:px-16">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div class="reveal reveal-left">
+                <div class={`grid gap-3 ${home.campusImages.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                    {home.campusImages.map((img: any, i: number) => (
+                        <img src={urlFor(img).width(700).height(i === 0 && home.campusImages.length > 2 ? 900 : 500).url()}
+                             class={`w-full object-cover rounded-2xl shadow-xl ${i === 0 && home.campusImages.length > 2 ? 'row-span-2 h-full' : 'h-[240px]'}`}
+                             alt="Kampus SMA ABBS Yogyakarta">
+                    ))}
+                </div>
+            </div>
+            <div class="reveal reveal-right">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-[2px] bg-[#2E6DA4]"></div>
+                    <span class="text-[10px] font-bold text-[#2E6DA4] tracking-[0.4em] uppercase">
+                        {home?.campusOverline || 'Kunjungi Kampus Kami'}
+                    </span>
+                </div>
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+                    {home?.campusTitle || 'Kampus Baru,'} <span class="font-black text-[#2E6DA4]">{home?.campusTitleHighlight || 'Siap Menyambut'}</span>
+                </h2>
+                <p class="text-gray-500 leading-relaxed mb-8">
+                    {home?.campusDescription || 'Fasilitas yang dirancang khusus untuk mendukung program Cambridge International Program, ICT, dan Tahfidz — siap menyambut siswa angkatan pertama.'}
+                </p>
+                {home?.campusAddress && (
+                    <div class="flex items-start gap-3 mb-6 text-sm text-gray-600">
+                        <i class="fa-solid fa-location-dot text-[#800000] mt-1"></i>
+                        <span>{home.campusAddress}</span>
+                    </div>
+                )}
+                {home?.campusMapLink && (
+                    <a href={home.campusMapLink} target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[#2E6DA4] border-b-2 border-[#2E6DA4] pb-1 hover:gap-4 transition-all duration-300">
+                        Lihat di Google Maps <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                )}
+            </div>
+        </div>
+    </div>
+</section>
+)}
+
+<section class="bg-[#f7f6f4] py-24">
+    <div class="container mx-auto px-6 md:px-16">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-14 gap-4">
+            <div class="reveal reveal-left">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-6 h-px bg-[#2E6DA4]"></div>
+                    {/* Teks Dinamis Label Video */}
+                    <span class="text-[10px] font-bold text-[#2E6DA4] tracking-[0.4em] uppercase">
+                        {home?.videoOverline || 'Learning Experience'}
+                    </span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-light text-gray-900">
+                    {home?.videoHeader || 'Suasana Belajar'} 
+                    {/* Teks Dinamis Highlight Video */}
+                    <span class="font-black text-[#2E6DA4]">{home?.videoHeaderHighlight || 'Interaktif'}</span>
+                </h2>
+            </div>
+            {settings?.socmedYt && (
+                <a href={settings.socmedYt} target="_blank" 
+                   class="hidden md:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-red-600 transition-colors duration-200 group reveal reveal-right">
+                    <i class="fa-brands fa-youtube text-red-500 text-base group-hover:scale-110 transition-transform duration-200"></i>
+                    {/* Teks Dinamis Tonton Youtube */}
+                    {home?.videoYoutubeText || 'Lihat Kanal Youtube'}
+                </a>
+            )}
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+            {home?.learningVideos?.map((video: any, vi: number) => (
+                <div
+                    class="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer open-video reveal reveal-up h-72 md:h-80"
+                    style={`--reveal-delay: ${vi * 110}ms; background: #111;`}
+                    data-video={video.videoUrl}>
+
+                    <img
+                        src={video.thumbnail
+                            ? urlFor(video.thumbnail).width(600).height(400).url()
+                            : "https://placehold.co/600x400/111/333?text=Video"}
+                        alt={video.title}
+                        class="absolute inset-0 w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.07] opacity-85 group-hover:opacity-100">
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10"></div>
+                    <div class="absolute inset-0 bg-[#2E6DA4]/0 group-hover:bg-[#2E6DA4]/20 transition-colors duration-500"></div>
+
+                    <div class="absolute top-4 left-4 flex items-center gap-2 z-10">
+                        <div class="relative flex items-center justify-center w-5 h-5">
+                            <span class="absolute inline-flex w-full h-full rounded-full bg-red-500 opacity-50 video-pulse-ring"></span>
+                            <span class="relative inline-flex w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                        </div>
+                        <span class="text-[9px] font-black uppercase tracking-[0.3em] text-white/90 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-sm">
+                            Video
+                        </span>
+                    </div>
+
+                    {video.category && (
+                        <div class="absolute top-4 right-4 z-10">
+                            <span class={`text-[9px] font-bold uppercase tracking-[0.2em] px-2.5 py-1.5 ${video.colorClass || 'bg-[#2E6DA4]'} text-white shadow-lg rounded-sm`}>
+                                {video.category}
+                            </span>
+                        </div>
+                    )}
+
+                    <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                        <div class="play-btn-wrap relative flex items-center justify-center">
+                            <div class="absolute w-[72px] h-[72px] rounded-full border border-white/25 group-hover:border-yellow-400/60 group-hover:scale-110 transition-all duration-500"></div>
+                            <div class="w-14 h-14 rounded-full flex items-center justify-center
+                                        bg-white/10 backdrop-blur-md border border-white/20
+                                        group-hover:bg-yellow-500 group-hover:border-yellow-400
+                                        transition-all duration-400 shadow-2xl
+                                        group-hover:scale-110">
+                                <svg class="w-5 h-5 ml-0.5 text-white group-hover:text-[#2E6DA4] transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="5,3 19,12 5,21"/>
+                                </svg>
+                            </div>
+                            <div class="absolute w-14 h-14 rounded-full bg-yellow-400/20 scale-0 group-hover:scale-150 opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 w-full z-10 p-5 md:p-6 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-400 text-center">
+                        <h3 class="font-bold text-white leading-snug transition-colors duration-300 text-lg md:text-xl mb-1">
+                            {video.title}
+                        </h3>
+
+                        <div class="flex items-center justify-center gap-2 mt-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                            <span class="text-yellow-400 text-[10px] font-bold uppercase tracking-[0.25em]">Tonton Sekarang</span>
+                            <svg class="w-3 h-3 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+</section>
+
+{home?.stats && home.stats.length > 0 && (
+<section class="relative bg-[#2E6DA4] overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.06]" style="background-image: repeating-linear-gradient(135deg, #fff 0, #fff 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+    
+    <div class="container mx-auto px-6 md:px-16 py-20 relative z-10">
+        <div class="grid grid-cols-2 md:grid-cols-4">
+            {home.stats.map((stat: any, i: number) => (
+                <div class="stat-item text-center px-6 py-8 relative group reveal reveal-up" data-index={i} style={`--reveal-delay: ${i * 100}ms`}>
+                    {i > 0 && <div class="absolute left-0 top-1/4 h-1/2 w-px bg-white/15 hidden md:block"></div>}
+                    <div class="stat-num text-4xl md:text-6xl font-black text-white mb-2 leading-none">{stat.value}</div>
+                    <div class="w-6 h-[2px] bg-yellow-400 mx-auto mb-3"></div>
+                    <p class="text-[10px] text-white/70 tracking-[0.2em] uppercase font-medium">{stat.label}</p>
+                </div>
+            ))}
+        </div>
+    </div>
+</section>
+)}
+
+{home?.networkUnits && home.networkUnits.length > 0 && (
+<section class="relative bg-[#f7f6f4] py-24 overflow-hidden">
+    <div class="container mx-auto px-6 md:px-16">
+        <div class="max-w-2xl mx-auto text-center mb-16 reveal reveal-up">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-8 h-[2px] bg-[#2E6DA4]"></div>
+                <span class="text-[10px] font-bold text-[#2E6DA4] tracking-[0.4em] uppercase">
+                    {home?.networkOverline || 'Bukan Berdiri Sendiri'}
+                </span>
+                <div class="w-8 h-[2px] bg-[#2E6DA4]"></div>
+            </div>
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-5">
+                {home?.networkTitle || 'Bagian dari'} <span class="font-black text-[#2E6DA4]">{home?.networkTitleHighlight || 'Jaringan ABBS'}</span>
+            </h2>
+            <p class="text-gray-500 leading-relaxed">
+                {home?.networkDescription}
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {home.networkUnits.map((unit: any, index: number) => (
+                <a href={unit.link || '#'} target={unit.link ? '_blank' : '_self'} rel="noopener noreferrer"
+                   class="group relative overflow-hidden rounded-2xl aspect-[3/4] flex flex-col justify-end reveal reveal-up block"
+                   style={`--reveal-delay: ${index * 100}ms`}>
+                    <img src={unit.image ? urlFor(unit.image).width(700).height(950).url() : "https://placehold.co/700x950"}
+                         class="absolute inset-0 w-full h-full object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-110"
+                         alt={unit.name}>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90"></div>
+                    <div class={`absolute inset-0 ${index % 2 === 0 ? 'bg-[#2E6DA4]/80' : 'bg-[#800000]/70'} opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-multiply`}></div>
+
+                    <span class="absolute top-6 right-6 text-6xl font-black text-white/10 leading-none select-none group-hover:text-white/20 transition-colors duration-700">
+                        0{index + 1}
+                    </span>
+
+                    <div class="relative z-10 p-6 transform transition-transform duration-500 group-hover:-translate-y-2">
+                        <div class="w-8 h-[2px] bg-[#60A0D0] mb-4 group-hover:w-14 transition-all duration-500 ease-out"></div>
+                        <h3 class="font-bold text-white text-lg leading-tight mb-2">{unit.name}</h3>
+                        <p class="text-white/60 text-xs uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-location-dot mr-1"></i> {unit.location}
+                        </p>
+                        {unit.tagline && <p class="text-white/70 text-xs leading-relaxed line-clamp-2">{unit.tagline}</p>}
+                    </div>
+                </a>
+            ))}
+        </div>
+    </div>
+</section>
+)}
+
+{safeAchievements.length > 0 && (
+<section class="relative bg-[#07090e] py-24 overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 left-1/3 w-[500px] h-[500px] bg-yellow-500/[0.04] rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[#2E6DA4]/[0.08] rounded-full blur-[80px]"></div>
+    </div>
+
+    <div class="container mx-auto px-6 md:px-16 mb-14 relative z-10">
+        <div class="flex items-end justify-between">
+            <div class="reveal reveal-left">
+                <div class="flex items-center gap-3 mb-4">
+                    <i class="fa-solid fa-trophy text-yellow-500 text-xs"></i>
+                    <div class="w-6 h-px bg-yellow-500/60"></div>
+                    {/* Teks Dinamis Label Prestasi */}
+                    <span class="text-[10px] font-bold text-yellow-500 tracking-[0.4em] uppercase">
+                        {home?.achievementsOverline || 'Hall of Fame'}
+                    </span>
+                </div>
+                <h2 class="text-3xl md:text-5xl font-light text-white leading-tight">
+                    {/* Teks Dinamis Judul Prestasi */}
+                    {home?.achievementsTitle || 'Siswa'} <span class="font-black text-yellow-400">{home?.achievementsTitleHighlight || 'Berprestasi'}</span>
+                </h2>
+            </div>
+        </div>
+    </div>
+    
+    <div class="achievements-scroll-container group relative z-10">
+        <div class="prestasi-scroll-wrapper gap-4 px-6">
+            {[...safeAchievements, ...safeAchievements].map((item: any) => (
+                <div 
+                    class={`hof-card flex-shrink-0 group/card ${item.videoUrl ? 'cursor-pointer open-video' : ''}`}
+                    data-video={item.videoUrl || null}
+                    style="width: 220px;">
+                    <div class="relative overflow-hidden bg-gray-900 shadow-2xl" style="aspect-ratio: 2/3;">
+                        <img 
+                            src={item.photo ? urlFor(item.photo).url() : "https://placehold.co/400x600"} 
+                            class="w-full h-full object-cover opacity-80 group-hover/card:opacity-100 transition-all duration-700 group-hover/card:scale-105"
+                            alt={item.name}>
+                        <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0.95) 100%);"></div>
+                        <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-yellow-500 origin-bottom scale-y-0 group-hover/card:scale-y-100 transition-transform duration-500"></div>
+                        
+                        {item.videoUrl && (
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                                <div class="w-14 h-14 rounded-full bg-yellow-500/90 text-[#07090e] flex items-center justify-center shadow-2xl translate-y-3 group-hover/card:translate-y-0 transition-transform duration-300">
+                                    <i class="fa-solid fa-play ml-1 text-lg"></i>
+                                </div>
+                            </div>
+                        )}
+
+                        <div class="absolute bottom-0 left-0 w-full p-5">
+                            <div class="inline-flex items-center gap-1.5 mb-2">
+                                <i class="fa-solid fa-medal text-yellow-500 text-[10px]"></i>
+                                <span class="text-yellow-400 text-[10px] font-bold uppercase tracking-wider line-clamp-1">
+                                    {item.achievementTitle}
+                                </span>
+                            </div>
+                            <h3 class="text-white text-base font-bold leading-snug">{item.name}</h3>
+                            {item.batch && (
+                                <p class="text-gray-400 text-[10px] uppercase tracking-widest mt-1">{item.batch}</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+</section>
+)}
+
+{home?.foundingTitle && (
+<section class="relative bg-[#07090e] py-28 overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 right-0 w-[700px] h-[700px] bg-[#2E6DA4]/[0.18] rounded-full blur-[150px]"></div>
+        <div class="absolute bottom-0 left-0 w-[550px] h-[550px] bg-[#800000]/[0.12] rounded-full blur-[130px]"></div>
+        <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 28px 28px;"></div>
+    </div>
+    <div class="container mx-auto px-6 md:px-16 relative z-10 text-center max-w-3xl">
+        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-5 py-2 mb-8 reveal reveal-up">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#800000] animate-pulse"></span>
+            <span class="text-[10px] font-bold text-white/70 tracking-[0.3em] uppercase">
+                {home?.foundingOverline || 'Kesempatan Terbatas'}
+            </span>
+        </div>
+        <h2 class="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 reveal reveal-up">
+            {home?.foundingTitle || 'Jadilah'} <span class="font-black text-[#60A0D0]">{home?.foundingTitleHighlight || 'Angkatan Pertama'}</span>
+        </h2>
+        <p class="text-white/60 leading-relaxed mb-12 reveal reveal-up">
+            {home?.foundingDescription}
+        </p>
+
+        {home?.foundingBenefits && home.foundingBenefits.length > 0 && (
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                {home.foundingBenefits.map((b: any) => (
+                    <div class="relative bg-white/[0.03] border border-white/10 rounded-xl p-5 reveal reveal-up backdrop-blur-sm hover:border-[#60A0D0]/40 hover:bg-white/[0.05] transition-all duration-300">
+                        <i class={`fa-solid ${b.icon || 'fa-star'} text-[#60A0D0] text-xl mb-3`}></i>
+                        <p class="text-white/80 text-xs leading-snug">{b.text}</p>
+                    </div>
+                ))}
+            </div>
+        )}
+
+        <a href={home?.foundingCtaLink || '#'}
+           class="inline-flex items-center gap-2 bg-[#2E6DA4] text-white font-black text-sm tracking-[0.15em] uppercase px-10 py-4 rounded-sm shadow-[0_0_40px_rgba(46,109,164,0.35)] hover:bg-white hover:text-[#07090e] hover:shadow-[0_0_50px_rgba(255,255,255,0.2)] transition-all duration-300 hover:-translate-y-1">
+            {home?.foundingCtaText || 'Daftar Sekarang'}
+        </a>
+    </div>
+</section>
+)}
+
+{home?.testimonials && home.testimonials.length > 0 && (
+<section class="relative bg-[#0c0f18] overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute top-0 right-0 w-[700px] h-[700px] bg-[#2E6DA4]/[0.06] rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-yellow-500/[0.03] rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="container mx-auto px-6 md:px-16 py-20 relative z-10">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-4 reveal reveal-left">
+                <div class="w-8 h-px bg-yellow-500"></div>
+                {/* Teks Dinamis Label Testimoni */}
+                <span class="text-[10px] font-bold text-yellow-500 tracking-[0.4em] uppercase">
+                    {home?.testimonialsOverline || 'Success Stories'}
+                </span>
+            </div>
+            {home.testimonials.length > 1 && (
+                <div class="flex items-center gap-3">
+                    <button id="prevTesti" class="testi-nav-btn w-10 h-10 border border-white/15 flex items-center justify-center text-white/50 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/5 transition-all duration-200 group">
+                        <i class="fa-solid fa-chevron-left text-xs group-hover:-translate-x-0.5 transition-transform duration-200"></i>
+                    </button>
+                    <button id="nextTesti" class="testi-nav-btn w-10 h-10 border border-white/15 flex items-center justify-center text-white/50 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/5 transition-all duration-200 group">
+                        <i class="fa-solid fa-chevron-right text-xs group-hover:translate-x-0.5 transition-transform duration-200"></i>
+                    </button>
+                </div>
+            )}
+        </div>
+
+        <div id="testiSliderContainer" class="relative min-h-[360px]">
+            {home.testimonials.map((testi: any, index: number) => (
+            <div class={`testi-slide ${index === 0 ? 'opacity-100 visible relative' : 'opacity-0 invisible absolute inset-0'} transition-opacity duration-700`}>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 lg:gap-16 items-center lg:items-start">
+                    
+                    <div class={`relative mx-auto lg:mx-0 w-full max-w-[260px] lg:max-w-full flex-shrink-0 group/vid ${testi.videoUrl ? 'cursor-pointer open-video' : ''}`} data-video={testi.videoUrl || null}>
+                        <div class="relative overflow-hidden shadow-2xl" style="aspect-ratio: 3/4;">
+                            <img 
+                                src={testi.photo ? urlFor(testi.photo).url() : "https://placehold.co/400x500"} 
+                                class="w-full h-full object-cover transition-transform duration-700 group-hover/vid:scale-105" 
+                                alt={testi.name}>
+                            <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%);"></div>
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-500"></div>
+
+                            {testi.videoUrl && (
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="w-16 h-16 rounded-full bg-yellow-500 text-[#2E6DA4] flex items-center justify-center shadow-xl group-hover/vid:scale-110 transition-transform duration-300">
+                                        <i class="fa-solid fa-play ml-1 text-2xl"></i>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div class="absolute bottom-0 left-0 w-full p-5">
+                                <p class="text-yellow-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">
+                                    {testi.batch || 'Alumni'}
+                                </p>
+                                <p class="text-white font-bold text-base leading-tight">{testi.name}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col justify-center pt-0 text-center lg:text-left">
+                        <div class="text-yellow-500/20 leading-none mb-3 font-serif select-none mx-auto lg:mx-0" style="font-size: 6rem; line-height: 1;">"</div>
+                        <blockquote class="text-xl md:text-2xl lg:text-3xl text-white font-light leading-[1.4] mb-8 italic">
+                            {testi.quote}
+                        </blockquote>
+
+                        <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-6 justify-center lg:justify-start border-t border-white/10 lg:border-none pt-6 lg:pt-0">
+                            <div class="lg:border-l-2 border-[#2E6DA4] lg:pl-4">
+                                <p class="text-white font-bold text-sm uppercase tracking-widest">{testi.name}</p>
+                                <p class="text-gray-400 text-xs mt-1 font-light">
+                                    {/* Teks Dinamis Kata Pengantar Univ */}
+                                    {home?.testimonialsAcceptedText || 'Diterima di'} <span class="text-yellow-400 font-semibold">{testi.univ}</span>
+                                </p>
+                            </div>
+                            {testi.univLogo && (
+                                <div class="mt-2 lg:mt-0 p-2 bg-white/5 rounded-sm inline-block">
+                                    <img 
+                                        src={urlFor(testi.univLogo).height(40).url()} 
+                                        class="h-8 w-auto opacity-90"
+                                        alt="Logo Universitas">
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ))}
+        </div>
+
+        <div class="flex items-center justify-between mt-10 pt-6 border-t border-white/[0.07]">
+            <div class="flex gap-2" id="testiDots">
+                {home.testimonials.map((_: any, i: number) => (
+                    <button 
+                        class={`testi-dot rounded-full transition-all duration-400 ${i === 0 ? 'w-7 h-[3px] bg-yellow-500' : 'w-[3px] h-[3px] bg-white/20 hover:bg-white/40'}`}
+                        data-index={i}>
+                    </button>
+                ))}
+            </div>
+            <span class="text-white/20 text-xs tabular-nums font-mono" id="testiCounter">
+                01 / {String(home.testimonials.length).padStart(2, '0')}
+            </span>
+        </div>
+    </div>
+</section>
+)}
+
+<section class="bg-white py-14 overflow-hidden border-t border-gray-100">
+    <div class="container mx-auto px-6 mb-8 text-center reveal reveal-up">
+        {/* Teks Dinamis Label Alumni */}
+        <p class="text-[10px] font-bold text-gray-400 tracking-[0.45em] uppercase">
+            {home?.alumniOverline || 'Alumni Kami Diterima Di'}
+        </p>
+    </div>
+    <div class="logo-scroll-container">
+        <div class="logo-scroll-wrapper gap-16 items-center">
+            {safeLogos.length > 0 && [...safeLogos, ...safeLogos].map((logo: any) => (
+                <img src={urlFor(logo).height(80).url()} class="h-12 w-auto object-contain opacity-40 hover:opacity-100 grayscale hover:grayscale-0 transition-all duration-500 flex-shrink-0" alt="Logo Universitas">
+            ))}
+        </div>
+    </div>
+</section>
+
+{home?.faqItems && home.faqItems.length > 0 && (
+<section class="relative bg-white py-24 overflow-hidden border-t border-gray-100">
+    <div class="container mx-auto px-6 md:px-16 max-w-3xl">
+        <div class="text-center mb-14 reveal reveal-up">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-8 h-[2px] bg-[#2E6DA4]"></div>
+                <span class="text-[10px] font-bold text-[#2E6DA4] tracking-[0.4em] uppercase">
+                    {home?.faqOverline || 'Sering Ditanyakan'}
+                </span>
+            </div>
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-900">
+                {home?.faqTitle || 'Pertanyaan'} <span class="font-black text-[#2E6DA4]">{home?.faqTitleHighlight || 'Seputar PPDB'}</span>
+            </h2>
+        </div>
+
+        <div class="space-y-3">
+            {home.faqItems.map((faq: any) => (
+                <details class="faq-item group bg-[#fafaf9] rounded-xl overflow-hidden reveal reveal-up">
+                    <summary class="flex items-center justify-between gap-4 cursor-pointer list-none px-6 py-5 font-bold text-gray-900 text-sm md:text-base">
+                        {faq.question}
+                        <i class="fa-solid fa-chevron-down text-[#2E6DA4] text-xs transition-transform duration-300 flex-shrink-0"></i>
+                    </summary>
+                    <div class="px-6 pb-5 text-gray-500 text-sm leading-relaxed">
+                        {faq.answer}
+                    </div>
+                </details>
+            ))}
+        </div>
+    </div>
+</section>
+)}
 
 <style>
-  /* Satu momen masuk yang terkoordinasi untuk hero saja — bukan animasi
-     berulang di setiap section saat discroll. */
-  .hero-in {
-    animation: heroIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  @keyframes heroIn {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .hero-in { animation: none; }
-  }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item[open] summary i { transform: rotate(180deg); }
 </style>
+
+<section class="bg-[#fafaf9] py-24">
+    <div class="container mx-auto px-6 md:px-16">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-14 gap-4">
+            <div class="reveal reveal-left">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-6 h-px bg-[#2E6DA4]/50"></div>
+                    {/* Teks Dinamis Label Jurnal */}
+                    <span class="text-[10px] font-bold text-[#2E6DA4]/60 tracking-[0.4em] uppercase">
+                        {home?.journalOverline || 'Journal'}
+                    </span>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-light text-gray-900">
+                    {/* Teks Dinamis Judul Jurnal */}
+                    {home?.journalTitle || 'Latest'} <span class="font-black text-[#2E6DA4]">{home?.journalTitleHighlight || 'Updates'}</span>
+                </h2>
+            </div>
+            <a href="/news" class="hidden md:inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-[#2E6DA4] transition-colors duration-200 group border-b border-gray-200 pb-1 hover:border-[#2E6DA4] reveal reveal-right">
+                {/* Teks Dinamis Semua Berita */}
+                {home?.journalLinkText || 'Semua Berita'} <i class="fa-solid fa-arrow-right text-[9px] group-hover:translate-x-1 transition-transform duration-200"></i>
+            </a>
+        </div>
+
+        {posts && posts.length > 0 ? (
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                {posts.map((post: any, pi: number) => (
+                    <a href={`/news/${post.slug.current}`} class={`group cursor-pointer block reveal reveal-up`} style={`--reveal-delay: ${pi * 120}ms`}>
+                        <div class="relative overflow-hidden bg-gray-100 mb-5 rounded-lg shadow-sm group-hover:shadow-xl transition-all duration-300" style="aspect-ratio: 16/10;">
+                            <img 
+                                src={post.mainImage ? urlFor(post.mainImage).width(700).height(437).url() : "https://placehold.co/700x437"} 
+                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            <div class="absolute top-0 left-0 bg-[#2E6DA4] text-white font-bold px-3 py-2 text-center leading-none rounded-br-lg">
+                                <span class="block text-lg font-black">{formatDate(post.publishedAt).split(' ')[0]}</span>
+                                <span class="block text-[9px] tracking-widest uppercase opacity-70">{formatDate(post.publishedAt).split(' ')[1]}</span>
+                            </div>
+                        </div>
+                        <div class="px-1">
+                            <span class="text-[9px] font-bold text-yellow-600 uppercase tracking-[0.3em] mb-2.5 block">
+                                {post.category || 'Berita'}
+                            </span>
+                            <h3 class="text-base md:text-lg text-gray-900 font-bold leading-snug group-hover:text-[#2E6DA4] transition-colors duration-200 line-clamp-2 mb-3">
+                                {post.title}
+                            </h3>
+                            <div class="flex items-center gap-2 text-[10px] text-gray-400 uppercase tracking-widest">
+                                <div class="w-4 h-px bg-gray-300 group-hover:bg-[#2E6DA4] transition-colors"></div>
+                                <span class="group-hover:text-[#2E6DA4] transition-colors">Baca Selengkapnya</span>
+                            </div>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        ) : (
+            <p class="text-gray-400 text-sm">Belum ada berita yang dipublikasikan.</p>
+        )}
+    </div>
+</section>
+
+<section class="relative bg-white py-24 overflow-hidden border-t border-gray-100">
+    <div class="container mx-auto px-6 md:px-12 relative z-10">
+        <div class="bg-[#2E6DA4] rounded-3xl p-10 md:p-24 relative overflow-hidden shadow-2xl text-center flex flex-col items-center max-w-5xl mx-auto reveal reveal-up">
+            
+            <div class="absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+
+            <div class="inline-flex items-center gap-3 mb-6 relative z-10">
+                <div class="w-8 h-[2px] bg-yellow-400"></div>
+                {/* Teks Dinamis Label CTA */}
+                <span class="text-yellow-400 text-xs font-bold tracking-[0.3em] uppercase">
+                    {home?.ctaOverline || 'Penerimaan Peserta Didik Baru'}
+                </span>
+                <div class="w-8 h-[2px] bg-yellow-400"></div>
+            </div>
+            
+            <h2 class="relative z-10 text-3xl md:text-5xl lg:text-6xl font-light text-white mb-6 leading-tight">
+                {home?.ctaTitle || (<>Mulai Perjalanan <br/><span class="font-bold">Masa Depan</span> Bersama Kami</>)}
+            </h2>
+            
+            <p class="relative z-10 text-gray-300 text-sm md:text-base leading-relaxed mb-12 max-w-2xl font-light">
+                {home?.ctaDesc || 'Bergabunglah dengan ekosistem pendidikan yang mengintegrasikan kecerdasan sains, teknologi mutakhir, dan karakter Qur\'ani yang kokoh.'}
+            </p>
+
+            <div class="relative z-10 flex flex-col sm:flex-row justify-center items-center gap-4 w-full sm:w-auto">
+                <a href={settings?.registerLink || home?.ctaLink || '#'} 
+                   class="w-full sm:w-auto px-10 py-4 bg-yellow-500 text-[#2E6DA4] font-black text-sm tracking-[0.15em] uppercase hover:bg-yellow-400 hover:shadow-[0_0_30px_rgba(128,0,0,0.4)] transition-all duration-300 hover:-translate-y-1 rounded-sm">
+                    {/* Teks Dinamis Tombol Utama CTA */}
+                    {home?.ctaButtonPrimaryText || 'Daftar Sekarang'}
+                </a>
+                {home?.ppdbLink && (
+                    <a href={home.ppdbLink} 
+                       class="w-full sm:w-auto px-10 py-4 border border-white/30 text-white font-semibold text-sm tracking-[0.15em] uppercase hover:border-white hover:bg-white/10 transition-all duration-300 rounded-sm">
+                        {/* Teks Dinamis Tombol Kedua CTA */}
+                        {home?.ctaButtonSecondaryText || 'Info Lengkap'}
+                    </a>
+                )}
+            </div>
+        </div>
+    </div>
+</section>
+
+{/* SAFELIST TAILWIND */}
+<div class="hidden bg-[#2E6DA4]/80 bg-yellow-600/80 bg-green-800/80 bg-blue-800/80 bg-red-700 bg-blue-700 bg-green-700 text-[#2E6DA4] bg-[#2E6DA4]"></div>
+
+</MainLayout>
+
+<style>
+/* ─── Marquee ───────────────────────────────────────────── */
+@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes scroll-prestasi { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.logo-scroll-container { width: 100%; overflow: hidden; }
+.logo-scroll-wrapper { display: flex; width: max-content; animation: scroll 40s linear infinite; }
+.logo-scroll-wrapper:hover { animation-play-state: paused; }
+.achievements-scroll-container { width: 100%; overflow: hidden; }
+.prestasi-scroll-wrapper { display: flex; width: max-content; animation: scroll-prestasi 65s linear infinite; }
+.achievements-scroll-container:hover .prestasi-scroll-wrapper { animation-play-state: paused; }
+
+/* ─── Hero ───────────────────────────────────────────────── */
+.hero-outline-text { -webkit-text-stroke: 2px rgba(255,255,255,0.7); color: transparent; }
+@media (min-width: 768px) { .hero-outline-text { -webkit-text-stroke: 3px rgba(255,255,255,0.6); } }
+
+.ppdb-glass {
+    background: rgba(0,0,0,0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.hero-overline { animation: fadeUp 0.8s ease forwards 0.4s; }
+.hero-title    { animation: fadeUp 0.9s ease forwards 0.7s; }
+.hero-play     { animation: fadeUp 0.8s ease forwards 1.1s; }
+.hero-logo     { animation: fadeUp 0.8s ease forwards 0.2s; opacity: 0; }
+
+.testi-slide { transition: opacity 0.6s ease; }
+.testi-slide.opacity-0 { pointer-events: none; }
+.testi-dot { display: inline-block; }
+
+/* ─── Loading screen ─────────────────────────────────────── */
+@keyframes loaderRingSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+.loader-ring { animation: loaderRingSpin 1.8s linear infinite; }
+
+@keyframes loaderBarPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+/* Loader exit animation */
+#pageLoader.loader-exit {
+    animation: loaderExit 0.7s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+@keyframes loaderExit {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.04); pointer-events: none; }
+}
+
+/* ─── Scroll Reveal ──────────────────────────────────────── */
+.reveal {
+    opacity: 0;
+    will-change: opacity, transform;
+    transition:
+        opacity 0.75s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+/* Variants */
+.reveal-up    { transform: translateY(36px); }
+.reveal-left  { transform: translateX(-28px); }
+.reveal-right { transform: translateX(28px); }
+.reveal-scale { transform: scale(0.94); }
+
+/* When in view */
+.reveal.in-view {
+    opacity: 1;
+    transform: none;
+}
+
+/* ── Pulsing "live" red dot ───────────────────────── */
+@keyframes videoPulse {
+    0%, 100% { transform: scale(1);   opacity: 0.5; }
+    50%       { transform: scale(2.2); opacity: 0; }
+}
+.video-pulse-ring {
+    animation: videoPulse 2s ease-out infinite;
+}
+</style>
+
+<script is:inline>
+document.addEventListener('DOMContentLoaded', () => {
+
+    /* ═══════════════════════════════════════════════
+       LOADING SCREEN
+    ═══════════════════════════════════════════════ */
+    const loader    = document.getElementById('pageLoader');
+    const loaderBar = document.getElementById('loaderBar');
+    const loaderPct = document.getElementById('loaderPct');
+
+    if (loader && loaderBar) {
+        let progress = 0;
+        const duration = 1800; // ms total
+        const steps    = 60;
+        const interval = duration / steps;
+
+        const ease = t => 1 - Math.pow(1 - t, 3);
+
+        const tick = setInterval(() => {
+            progress++;
+            const pct = Math.round(ease(progress / steps) * 100);
+            loaderBar.style.width = pct + '%';
+            if (loaderPct) loaderPct.textContent = pct + '%';
+
+            if (progress >= steps) {
+                clearInterval(tick);
+                setTimeout(() => {
+                    loader.classList.add('loader-exit');
+                    loader.addEventListener('animationend', () => {
+                        loader.style.display = 'none';
+                        document.body.style.overflow = '';
+                    }, { once: true });
+                }, 250);
+            }
+        }, interval);
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    /* ═══════════════════════════════════════════════
+       HERO IMAGE zoom-out
+    ═══════════════════════════════════════════════ */
+    const heroImg = document.querySelector('.hero-img');
+    if (heroImg) {
+        setTimeout(() => { heroImg.style.transform = 'scale(1)'; }, 100);
+    }
+
+    /* ═══════════════════════════════════════════════
+       CLOSE PPDB PANEL
+    ═══════════════════════════════════════════════ */
+    const closePpdbBtn = document.getElementById('closePpdbBtn');
+    const ppdbFloatBox = document.getElementById('ppdbFloatBox');
+    if (closePpdbBtn && ppdbFloatBox) {
+        closePpdbBtn.addEventListener('click', () => {
+            ppdbFloatBox.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+        });
+    }
+
+    /* ═══════════════════════════════════════════════
+       SCROLL REVEAL
+    ═══════════════════════════════════════════════ */
+    if ('IntersectionObserver' in window) {
+        const revealObs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('in-view');
+                    revealObs.unobserve(entry.target); 
+                }
+            });
+        }, {
+            threshold: 0.12,
+            rootMargin: '0px 0px -40px 0px'
+        });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+    } else {
+        document.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+    }
+
+    /* ═══════════════════════════════════════════════
+       TESTIMONI SLIDER
+    ═══════════════════════════════════════════════ */
+    const slides  = document.querySelectorAll('.testi-slide');
+    const prevBtn = document.getElementById('prevTesti');
+    const nextBtn = document.getElementById('nextTesti');
+    const dots    = document.querySelectorAll('.testi-dot');
+    const counter = document.getElementById('testiCounter');
+    const total   = slides.length;
+
+    if (total > 1) {
+        let cur = 0, iv;
+
+        const updateCounter = () => {
+            if (counter) counter.textContent = `${String(cur+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+        };
+
+        const go = (idx) => {
+            if (idx >= total) idx = 0;
+            if (idx < 0)      idx = total - 1;
+            cur = idx;
+
+            slides.forEach((s, i) => {
+                const on = i === cur;
+                s.classList.toggle('opacity-100', on);
+                s.classList.toggle('visible',     on);
+                s.classList.toggle('relative',    on);
+                s.classList.toggle('opacity-0',  !on);
+                s.classList.toggle('invisible',  !on);
+                s.classList.toggle('absolute',   !on);
+            });
+
+            dots.forEach((d, i) => {
+                const on = i === cur;
+                d.classList.toggle('w-7',           on);
+                d.classList.toggle('h-[3px]',       on);
+                d.classList.toggle('bg-yellow-500', on);
+                d.classList.toggle('w-[3px]',      !on);
+                d.classList.toggle('bg-white/20',  !on);
+            });
+
+            updateCounter();
+        };
+
+        const reset = () => { clearInterval(iv); iv = setInterval(() => go(cur + 1), 6000); };
+
+        prevBtn?.addEventListener('click', () => { go(cur - 1); reset(); });
+        nextBtn?.addEventListener('click', () => { go(cur + 1); reset(); });
+        dots.forEach((d, i) => d.addEventListener('click', () => { go(i); reset(); }));
+        reset();
+    }
+
+});
+</script>
+

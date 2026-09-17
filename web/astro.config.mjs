@@ -4,11 +4,10 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 import sanity from '@sanity/astro';
-import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://abbs-jogja-2026.pages.dev',
+  site: 'https://abbs-jogja-2026.pages.dev', // TODO: ganti kalau nama project Cloudflare Pages-nya beda
   vite: {
     plugins: [tailwindcss()]
   },
@@ -17,8 +16,8 @@ export default defineConfig({
     sanity({
       projectId: 'ki64hdlp',
       dataset: 'production',
-      useCdn: true, // Gunakan Edge CDN untuk performa maksimal
-      apiVersion: '2026-07-20', // Gunakan tanggal hari ini
-    }), 
-    react()]
+      useCdn: false,
+      apiVersion: '2026-03-05',
+    })
+  ]
 });

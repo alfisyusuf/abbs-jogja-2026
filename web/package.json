@@ -1,10 +1,7 @@
 {
-  "name": "web",
+  "name": "abbs-jogja-web",
   "type": "module",
   "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -12,19 +9,18 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^6.0.1",
-    "@sanity/astro": "^3.4.2",
-    "@sanity/client": "^7.23.2",
-    "@sanity/image-url": "^2.1.1",
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "astro": "^7.1.1",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "react-is": "^19.2.7",
-    "sanity": "^6.5.0",
-    "styled-components": "^6.4.4",
-    "tailwindcss": "^4.3.3"
+    "@sanity/astro": "^3.2.11",
+    "@sanity/client": "^7.16.0",
+    "@sanity/image-url": "^2.0.3",
+    "@tailwindcss/vite": "^4.2.1",
+    "astro": "^5.17.1",
+    "astro-portabletext": "^0.13.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-is": "^19.2.4",
+    "sanity": "^5.13.0",
+    "styled-components": "^6.3.11",
+    "tailwindcss": "^4.2.1"
   }
 }
+
