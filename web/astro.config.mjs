@@ -14,7 +14,7 @@ export default defineConfig({
 
   integrations: [
     sanity({
-      projectId: 'ki64hdlp',
+      projectId: '8gsqkkhv',
       dataset: 'production',
       useCdn: false,
       apiVersion: '2026-03-05',

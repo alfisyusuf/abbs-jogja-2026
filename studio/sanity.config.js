@@ -1,7 +1,6 @@
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure' // Pastikan import structureTool dari sini
 import {visionTool} from '@sanity/vision'
-import {table} from '@sanity/table'
 import {schemaTypes} from './schemaTypes'
 
 // Tentukan mana saja dokumen yang bersifat Singleton (hanya 1 dokumen)
@@ -11,7 +10,7 @@ const singletonTypes = new Set(["siteSettings", "navbarSettings", "footerSetting
 export default defineConfig({
   name: 'default',
   title: 'SMA ABBS Yogyakarta Studio',
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || 'ki64hdlp',
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID || '8gsqkkhv',
   dataset: 'production',
 
   plugins: [
@@ -49,7 +48,6 @@ export default defineConfig({
           ]),
     }),
     visionTool(),
-    table(),
   ],
 
   schema: {
@@ -73,4 +71,3 @@ export default defineConfig({
     },
   },
 })
-

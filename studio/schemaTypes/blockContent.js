@@ -60,9 +60,5 @@ export default defineType({
         {name: 'alt', type: 'string', title: 'Alternative Text'}
       ]
     }),
-    defineArrayMember({
-      type: 'table',
-      title: 'Tabel Data'
-    })
   ],
 })
