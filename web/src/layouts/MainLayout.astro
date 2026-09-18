@@ -1,0 +1,151 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PopupModal from '../components/PopupModal.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import { sanityClient } from "sanity:client";
+import { createImageUrlBuilder } from "@sanity/image-url";
+
+const { title, description, image } = Astro.props;
+
+// 1. Inisialisasi Image Builder Sanity
+const builder = createImageUrlBuilder(sanityClient);
+function urlFor(source: any) {
+  return builder.image(source).auto('format');
+}
+
+// 2. Ambil SEO Default dan LOGO dari Settings Sanity
+const settings = await sanityClient.fetch(`*[_type == "siteSettings"][0]{seoDescription, logo, whatsappNumber, whatsappFloatMessage}`);
+const metaDesc = description || settings?.seoDescription || "SMA ABBS Yogyakarta - Excellence in Education";
+
+// 3. LOGIKA GAMBAR SHARE (OG IMAGE) DINAMIS
+// Jika halaman punya gambar (seperti artikel berita), pakai gambar itu.
+// Jika tidak (seperti halaman Home), pakai Logo dari Sanity dengan background Maroon agar elegan.
+const defaultOgImage = settings?.logo 
+    ? urlFor(settings.logo).width(1200).height(630).bg('2E6DA4').url() 
+    : '/logo-abbs-jogja-putih.png';
+const ogImage = image || defaultOgImage;
+
+// 4. LOGIKA FAVICON DINAMIS
+// Mengambil logo dari Sanity dan memotongnya jadi kotak kecil (256x256) untuk icon tab browser.
+const faviconUrl = settings?.logo 
+    ? urlFor(settings.logo).width(256).height(256).url() 
+    : '/favicon.ico';
+
+// Menangkap URL halaman saat ini
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+---
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={metaDesc}>
+    
+    <link rel="icon" type="image/png" sizes="256x256" href={faviconUrl} />
+    <link rel="apple-touch-icon" href={faviconUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={metaDesc} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:site_name" content="SMA ABBS Yogyakarta" />
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={metaDesc} />
+    <meta property="twitter:image" content={ogImage} />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style is:global>
+        body { font-family: 'Montserrat', sans-serif; }
+        .text-maroon { color: #2E6DA4; }
+        .bg-maroon { background-color: #2E6DA4; }
+        .border-maroon { border-color: #2E6DA4; }
+        .hover-bg-maroon:hover { background-color: #1E4E7D; }
+        .play-btn:hover { transform: scale(1.1); }
+        .glass-panel {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            border-top: none;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 m-0 p-0 overflow-x-hidden flex flex-col min-h-screen">
+    
+    <Navbar />
+    <PopupModal />
+    
+    <main class="flex-grow">
+        <slot />
+    </main>
+    
+    <Footer />
+    <WhatsAppButton whatsappNumber={settings?.whatsappNumber} message={settings?.whatsappFloatMessage} />
+
+    <div id="globalVideoLightbox" class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/95 opacity-0 transition-opacity duration-300">
+        <button id="closeGlobalVideo" class="absolute top-6 right-6 md:top-10 md:right-10 text-white text-4xl hover:text-yellow-400 transition z-20">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="w-full max-w-5xl aspect-video px-4 md:px-10 relative">
+            <iframe id="globalVideoIframe" class="w-full h-full rounded-sm shadow-2xl bg-black" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script is:inline>
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoModal = document.getElementById('globalVideoLightbox');
+            const closeVideoBtn = document.getElementById('closeGlobalVideo');
+            const videoIframe = document.getElementById('globalVideoIframe');
+            
+            const videoTriggers = document.querySelectorAll('.open-video'); 
+
+            videoTriggers.forEach(trigger => {
+                trigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    let videoUrl = trigger.getAttribute('data-video');
+                    if(videoUrl) {
+                        if (videoUrl.includes('watch?v=')) {
+                            videoUrl = videoUrl.replace('watch?v=', 'embed/');
+                        } else if (videoUrl.includes('youtu.be/')) {
+                            videoUrl = videoUrl.replace('youtu.be/', 'youtube.com/embed/');
+                        }
+                        videoIframe.src = videoUrl + "?autoplay=1";
+                        videoModal.classList.remove('hidden');
+                        videoModal.classList.add('flex');
+                        setTimeout(() => videoModal.classList.remove('opacity-0'), 10);
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            });
+
+            const closeLightbox = () => {
+                videoModal.classList.add('opacity-0');
+                setTimeout(() => {
+                    videoModal.classList.add('hidden');
+                    videoModal.classList.remove('flex');
+                    videoIframe.src = ''; 
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            }
+
+            closeVideoBtn?.addEventListener('click', closeLightbox);
+            videoModal?.addEventListener('click', (e) => {
+                if(e.target === videoModal) closeLightbox();
+            });
+        });
+    </script>
+</body>
+</html>
+

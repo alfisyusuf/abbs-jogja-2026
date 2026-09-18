@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/*
+ * PALET WARNA SMA ABBS YOGYAKARTA
+ * ================================
+ * Biru muda adalah warna DOMINAN (ciri khas unit ini) — dipakai di semua
+ * tempat yang tadinya maroon (tombol CTA, panel menu, background besar).
+ * Maroon TETAP ADA tapi sekarang jadi warna AKSEN kecil saja (dipakai di
+ * highlight teks, underline, badge) — supaya tetap terasa satu keluarga
+ * dengan unit ABBS lain (seragam Rabu maroon), tapi gak mendominasi.
+ *
+ * "#800000" literal di file .astro sudah diganti biru (#2E6DA4) di semua
+ * tempat KECUALI beberapa garis gradient dua-warna dan badge kategori
+ * "Info PPS" yang sengaja dipertahankan maroon sebagai aksen.
+ *
+ * Skala "yellow" Tailwind di-override ke MAROON (bukan biru) di sini —
+ * supaya semua pemakaian text-yellow-400, bg-yellow-500, dst di seluruh
+ * file otomatis jadi maroon (peran aksen), tanpa perlu ganti class satu-satu.
+ */
+@theme {
+  --color-yellow-300: #c2607d;
+  --color-yellow-400: #a8324f;
+  --color-yellow-500: #800000;
+  --color-yellow-600: #600000;
+}
+
