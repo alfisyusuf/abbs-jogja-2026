@@ -165,7 +165,7 @@ export default defineType({
                 {name: 'image', title: 'Gambar Background', type: 'image'},
                 {name: 'link', title: 'Link Halaman Detail (Opsional)', type: 'string'},
                 {name: 'color', title: 'Warna Aksen', type: 'string', options: {list: [
-                    {title: 'Maroon', value: 'bg-[#800000]/80'},
+                    {title: 'Gold', value: 'bg-[#C9A227]/80'},
                     {title: 'Kuning/Gold', value: 'bg-yellow-600/80'},
                     {title: 'Hijau', value: 'bg-green-800/80'},
                     {title: 'Biru', value: 'bg-blue-800/80'},
