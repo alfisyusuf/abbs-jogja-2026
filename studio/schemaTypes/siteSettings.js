@@ -13,6 +13,9 @@ export default defineType({
     defineField({ name: 'socmedYt', title: 'Link YouTube', type: 'url' }),
     defineField({ name: 'socmedWa', title: 'Link WhatsApp (https://wa.me/...)', type: 'url' }),
     defineField({ name: 'socmedTk', title: 'Link TikTok', type: 'url' }),
+    defineField({ name: 'socmedFb', title: 'Link Facebook', type: 'url' }),
+    defineField({ name: 'socmedX', title: 'Link Twitter / X', type: 'url' }),
+    defineField({ name: 'socmedThreads', title: 'Link Threads', type: 'url' }),
 
     // --- TOMBOL WHATSAPP MENGAMBANG ---
     defineField({
@@ -37,4 +40,3 @@ export default defineType({
     }
   }
 })
-
