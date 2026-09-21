@@ -16,7 +16,7 @@ function urlFor(source: any) {
 }
 
 // 2. Ambil SEO Default dan LOGO dari Settings Sanity
-const settings = await sanityClient.fetch(`*[_type == "siteSettings"][0]{seoDescription, logo, whatsappNumber, whatsappFloatMessage}`);
+const settings = await sanityClient.fetch(`*[_type == "siteSettings" && _id == "siteSettings"][0]{seoDescription, logo, whatsappNumber, whatsappFloatMessage}`);
 const metaDesc = description || settings?.seoDescription || "SMA ABBS Yogyakarta - Excellence in Education";
 
 // 3. LOGIKA GAMBAR SHARE (OG IMAGE) DINAMIS
